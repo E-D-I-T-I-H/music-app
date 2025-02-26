@@ -41,16 +41,21 @@
             const auth = getAuth(app);
 
             // Function for Google Sign-In
-            window.signInWithGoogle = async function() {
-                const provider = new GoogleAuthProvider();
-                try {
-                    const result = await signInWithPopup(auth, provider);
-                    const user = result.user;
-                    document.getElementById("user-info").innerText = "Logged in as: " + user.displayName;
-                } catch (error) {
-                    console.error("Error signing in: ", error);
-                }
-            };
+           window.signInWithGoogle = async function() {
+    const provider = new GoogleAuthProvider();
+    try {
+        console.log("Attempting sign-in...");
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+        console.log("Sign-in successful:", user);
+        document.getElementById("user-info").innerText = "Logged in as: " + user.displayName;
+    } catch (error) {
+        console.error("Error signing in: ", error);
+        console.log("Error code:", error.code);
+        console.log("Error message:", error.message);
+    }
+};
+
         </script>
     </body>
 </html>
