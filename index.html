@@ -62,7 +62,7 @@
 
         // Spotify API setup
         const clientId = '51396bbc121f4f19b0a3ac2ab8ff249f'; // Replace with your actual Spotify client ID
-        const redirectUri = "https://e-d-i-t-i-h.github.io/music-app//callback"; // Replace with your redirect URI
+        const redirectUri = "https://e-d-i-t-i-h.github.io/music-app/callback"; // Replace with your redirect URI
         const authEndpoint = 'https://accounts.spotify.com/authorize';
         const scopes = 'user-library-read user-read-playback-state user-modify-playback-state playlist-read-private playlist-read-collaborative';
 
@@ -70,26 +70,24 @@
         let player;
 
         // Check if the user is authenticated
-       // Check if the user is authenticated
-function getAccessToken() {
-    const urlParams = new URLSearchParams(window.location.hash.substr(1)); // Get token from the hash
-    const token = urlParams.get('access_token');
-    
-    if (token) {
-        accessToken = token;
-        window.history.pushState('', '', window.location.pathname); // Clean the URL by removing the access token from the URL
+        function getAccessToken() {
+            const urlParams = new URLSearchParams(window.location.hash.substr(1)); // Get token from the hash
+            const token = urlParams.get('access_token');
+            
+            if (token) {
+                accessToken = token;
+                window.history.pushState('', '', window.location.pathname); // Clean the URL by removing the access token from the URL
 
-        // Redirect to the correct path (/music-app/) if needed (concatenating /music-app/)
-        if (!window.location.pathname.includes("/music-app/")) {
-            window.location.href = "/music-app/"; // Append /music-app/ if not present
+                // Redirect to the correct path (/music-app/) if needed
+                if (window.location.pathname.includes("callback")) {
+                    window.location.href = "/music-app/"; // Ensure it redirects to /music-app/
+                }
+
+                document.getElementById('user-info').innerText = 'Logged in!';
+                document.getElementById('login-button').style.display = 'none';
+                initializeSpotifyPlayer();
+            }
         }
-
-        document.getElementById('user-info').innerText = 'Logged in!';
-        document.getElementById('login-button').style.display = 'none';
-        initializeSpotifyPlayer();
-    }
-}
-
 
         // Handle Login with Google
         document.getElementById('google-login-button').addEventListener('click', () => {
