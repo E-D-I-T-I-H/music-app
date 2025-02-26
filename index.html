@@ -1,145 +1,125 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Music App</title>
+// Firebase configuration (keep your existing configuration here)
+const firebaseConfig = {
+    apiKey: "AIzaSyAF8R4iNFv3oAZVOZcw5fWUPz8FScTeBXM",
+    authDomain: "musicapp-3a435.firebaseapp.com",
+    projectId: "musicapp-3a435",
+    storageBucket: "musicapp-3a435.appspot.com",
+    messagingSenderId: "224181252004",
+    appId: "1:224181252004:web:4589e9da0d6400e5fd1b31",
+    measurementId: "G-FY5VPQG5NZ"
+};
+firebase.initializeApp(firebaseConfig);
 
-    <!-- Firebase SDK (CDN links) -->
-    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
+let player;
+let playlist = []; // Store playlist songs
+let currentSongIndex = 0; // Track current song in playlist
 
-    <!-- Link to external style.css file -->
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <h1>Welcome to the Music App</h1>
-    <p>Listen to music, chat, and vibe together.</p>
-
-    <!-- Sign-in Button -->
-    <button id="sign-in-button">Sign in with Google</button>
-
-    <!-- Display user info -->
-    <div id="user-info"></div>
-
-    <!-- Music Player -->
-    <div id="music-player">
-        <h2 id="song-title">Currently Playing: No song</h2>
-        <button id="play-btn">Play</button>
-        <button id="pause-btn" style="display:none;">Pause</button>
-        <button id="next-btn">Next</button>
-        <button id="prev-btn">Previous</button>
-    </div>
-
-    <!-- YouTube Embed Player -->
-    <div id="youtube-player">
-        <iframe id="yt-player" width="560" height="315" src="" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-    </div>
-
-    <!-- Sign-out Button -->
-    <button id="sign-out-button" style="display:none;">Sign Out</button>
-
-    <!-- Firebase Configuration and Logic -->
-    <script>
-        // Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyAF8R4iNFv3oAZVOZcw5fWUPz8FScTeBXM",
-            authDomain: "musicapp-3a435.firebaseapp.com",
-            projectId: "musicapp-3a435",
-            storageBucket: "musicapp-3a435.appspot.com",
-            messagingSenderId: "224181252004",
-            appId: "1:224181252004:web:4589e9da0d6400e5fd1b31",
-            measurementId: "G-FY5VPQG5NZ"
-        };
-
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-
-        // Google Sign-In function
-        const signInWithGoogle = () => {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            firebase.auth().signInWithPopup(provider).then((result) => {
-                const user = result.user;
-                // Update the user-info div to display the logged-in user's name
-                document.getElementById('user-info').innerText = `Logged in as: ${user.displayName}`;
-                // Hide the sign-in button and show the sign-out button
-                document.getElementById('sign-in-button').style.display = 'none';
-                document.getElementById('sign-out-button').style.display = 'inline-block';
-            }).catch((error) => {
-                console.error("Error signing in: ", error);
-            });
-        };
-
-        // Sign-out function
-        const signOut = () => {
-            firebase.auth().signOut().then(() => {
-                document.getElementById('user-info').innerText = 'Not logged in';
-                document.getElementById('sign-in-button').style.display = 'inline-block';
-                document.getElementById('sign-out-button').style.display = 'none';
-                document.getElementById('yt-player').src = ''; // Stop YouTube video when signed out
-            }).catch((error) => {
-                console.error("Error signing out: ", error);
-            });
-        };
-
-        // Event listener for the sign-in button
-        document.getElementById('sign-in-button').addEventListener('click', signInWithGoogle);
-
-        // Event listener for the sign-out button
-        document.getElementById('sign-out-button').addEventListener('click', signOut);
-
-        // Check if the user is already signed in
-        firebase.auth().onAuthStateChanged((user) => {
-            if (user) {
-                document.getElementById('user-info').innerText = `Logged in as: ${user.displayName}`;
-                document.getElementById('sign-in-button').style.display = 'none';
-                document.getElementById('sign-out-button').style.display = 'inline-block';
-            }
-        });
-
-        // Music playback
-        let isPlaying = false;
-        let currentSong = '';  // Track current song URL
-
-        const playBtn = document.getElementById('play-btn');
-        const pauseBtn = document.getElementById('pause-btn');
-        const ytPlayer = document.getElementById('yt-player');
-
-        // Function to play a song
-        function playSong(songUrl) {
-            ytPlayer.src = `https://www.youtube.com/embed/${songUrl}?autoplay=1`;
-            currentSong = songUrl;
-            document.getElementById('song-title').innerText = `Currently Playing: ${songUrl}`;
-            isPlaying = true;
-            playBtn.style.display = 'none';
-            pauseBtn.style.display = 'inline-block';
+// Initialize YouTube Player when API is ready
+function onYouTubeIframeAPIReady() {
+    player = new YT.Player('player', {
+        height: '390',
+        width: '640',
+        videoId: 'dQw4w9WgXcQ', // Example default video
+        events: {
+            'onStateChange': onPlayerStateChange
         }
+    });
+}
 
-        // Function to pause a song
-        function pauseSong() {
-            ytPlayer.src = ''; // Stops the video by removing the source
-            isPlaying = false;
-            playBtn.style.display = 'inline-block';
-            pauseBtn.style.display = 'none';
-        }
+// Handle YouTube player state change (e.g., video ended)
+function onPlayerStateChange(event) {
+    if (event.data == YT.PlayerState.ENDED) {
+        nextSong(); // Play next song when current one ends
+    }
+}
 
-        // Event listeners for buttons
-        playBtn.addEventListener('click', () => {
-            if (!isPlaying) {
-                playSong('VIDEO_ID'); // Replace 'VIDEO_ID' with the actual YouTube video ID
-            }
-        });
+// Play current song
+function playSong() {
+    if (player) {
+        player.playVideo();
+        document.getElementById('play-button').style.display = 'none';
+        document.getElementById('pause-button').style.display = 'inline';
+    }
+}
 
-        pauseBtn.addEventListener('click', pauseSong);
+// Pause current song
+function pauseSong() {
+    if (player) {
+        player.pauseVideo();
+        document.getElementById('play-button').style.display = 'inline';
+        document.getElementById('pause-button').style.display = 'none';
+    }
+}
 
-        // Add functionality for next/previous song buttons as needed
-        document.getElementById('next-btn').addEventListener('click', () => {
-            // Implement next song functionality
-        });
+// Next song in playlist
+function nextSong() {
+    if (playlist.length > 0) {
+        currentSongIndex = (currentSongIndex + 1) % playlist.length;
+        loadSong(playlist[currentSongIndex].id);
+    }
+}
 
-        document.getElementById('prev-btn').addEventListener('click', () => {
-            // Implement previous song functionality
-        });
-    </script>
-</body>
-</html>
+// Previous song in playlist
+function previousSong() {
+    if (playlist.length > 0) {
+        currentSongIndex = (currentSongIndex - 1 + playlist.length) % playlist.length;
+        loadSong(playlist[currentSongIndex].id);
+    }
+}
+
+// Load song by video ID
+function loadSong(videoId) {
+    if (player) {
+        player.loadVideoById(videoId);
+    }
+}
+
+// Search YouTube for songs
+document.getElementById('search-button').addEventListener('click', function() {
+    const query = document.getElementById('search-bar').value;
+    if (query) {
+        searchYouTube(query);
+    }
+});
+
+// Use YouTube API to search for videos
+function searchYouTube(query) {
+    const youtubeSearchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${query}&type=video&key=YOUR_API_KEY`;
+    
+    fetch(youtubeSearchUrl)
+        .then(response => response.json())
+        .then(data => {
+            const videos = data.items;
+            displayPlaylist(videos);
+        })
+        .catch(err => console.error('Error fetching YouTube data:', err));
+}
+
+// Display playlist of videos
+function displayPlaylist(videos) {
+    playlist = videos.map(video => ({
+        id: video.id.videoId,
+        title: video.snippet.title,
+        thumbnail: video.snippet.thumbnails.default.url
+    }));
+
+    const playlistContainer = document.getElementById('playlist');
+    playlistContainer.innerHTML = '';
+    playlist.forEach((video, index) => {
+        const listItem = document.createElement('li');
+        listItem.innerHTML = `<img src="${video.thumbnail}" alt="thumb"><span>${video.title}</span>`;
+        listItem.addEventListener('click', () => loadSong(video.id));
+        playlistContainer.appendChild(listItem);
+    });
+
+    // Load the first song from the playlist
+    if (playlist.length > 0) {
+        loadSong(playlist[0].id);
+    }
+}
+
+// Event listeners for play, pause, next, back buttons
+document.getElementById('play-button').addEventListener('click', playSong);
+document.getElementById('pause-button').addEventListener('click', pauseSong);
+document.getElementById('next-button').addEventListener('click', nextSong);
+document.getElementById('back-button').addEventListener('click', previousSong);
