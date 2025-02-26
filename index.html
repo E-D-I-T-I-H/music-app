@@ -70,17 +70,18 @@
         let player;
 
         // Check if the user is authenticated
-        function getAccessToken() {
+       // Check if the user is authenticated
+function getAccessToken() {
     const urlParams = new URLSearchParams(window.location.hash.substr(1)); // Get token from the hash
     const token = urlParams.get('access_token');
     
     if (token) {
         accessToken = token;
         window.history.pushState('', '', window.location.pathname); // Clean the URL by removing the access token from the URL
-        
-        // Redirect to the correct path (/music-app/) if needed
-        if (window.location.pathname.includes("callback")) {
-            window.location.href = "/music-app/"; // Ensure it redirects to /music-app/
+
+        // Redirect to the correct path (/music-app/) if needed (concatenating /music-app/)
+        if (!window.location.pathname.includes("/music-app/")) {
+            window.location.href = "/music-app/"; // Append /music-app/ if not present
         }
 
         document.getElementById('user-info').innerText = 'Logged in!';
@@ -88,6 +89,7 @@
         initializeSpotifyPlayer();
     }
 }
+
 
         // Handle Login with Google
         document.getElementById('google-login-button').addEventListener('click', () => {
