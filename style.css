@@ -1,0 +1,49 @@
+/* Reset some default styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Body styles */
+body {
+    background-color: #f4f4f4;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    color: #333;
+    padding: 20px;
+}
+
+/* Heading styles */
+h1 {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #333;
+}
+
+p {
+    font-size: 1.2rem;
+    margin: 10px 0;
+}
+
+/* Sign-in button styles */
+#sign-in-button {
+    background-color: #4CAF50; /* Green */
+    color: white;
+    padding: 15px 32px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#sign-in-button:hover {
+    background-color: #45a049; /* Darker Green */
+}
+
+/* User info display */
+#user-info {
+    margin-top: 20px;
+    font-size: 1.2rem;
+}
