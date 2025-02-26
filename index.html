@@ -15,17 +15,20 @@
     <body style="background-color: #1a202c; color: white; text-align: center; padding: 20px;">
         <h1 style="font-size: 2rem; font-weight: bold;">Welcome to the Music App</h1>
         <p style="font-size: 1.2rem;">Listen to music, chat, and vibe together.</p>
-        
+
         <button onclick="signInWithGoogle()" style="padding: 10px; background: #ffcc00; border: none; cursor: pointer;">Sign in with Google</button>
         
         <p id="user-info"></p>
 
         <script src="script.js"></script>
+        
+        <!-- Firebase Modular SDK -->
+        <script type="module">
+            // Importing the Firebase modules needed
+            import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+            import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
 
-        <!-- Firebase SDK -->
-        <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js"></script>
-        <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js"></script>
-        <script>
+            // Firebase config
             const firebaseConfig = {
                 apiKey: "AIzaSyAF8R4iNFv3oAZVOZcw5fWUPz8FScTeBXM",
                 authDomain: "musicapp-3a435.firebaseapp.com",
@@ -37,16 +40,19 @@
             };
 
             // Initialize Firebase
-            firebase.initializeApp(firebaseConfig);
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
 
-            function signInWithGoogle() {
-                var provider = new firebase.auth.GoogleAuthProvider();
-                firebase.auth().signInWithPopup(provider).then(function(result) {
-                    var user = result.user;
+            // Function for Google Sign-In
+            async function signInWithGoogle() {
+                const provider = new GoogleAuthProvider();
+                try {
+                    const result = await signInWithPopup(auth, provider);
+                    const user = result.user;
                     document.getElementById("user-info").innerText = "Logged in as: " + user.displayName;
-                }).catch(function(error) {
+                } catch (error) {
                     console.error("Error signing in: ", error);
-                });
+                }
             }
         </script>
     </body>
