@@ -22,7 +22,7 @@ p {
 }
 
 /* Button styles */
-#sign-in-button {
+#sign-in-button, #sign-out-button {
     background-color: #1E3A8A;  /* Dark blue button */
     color: white;
     font-size: 1.2rem;
@@ -33,7 +33,8 @@ p {
     transition: background-color 0.3s;
 }
 
-#sign-in-button:hover {
+/* Hover effect for buttons */
+#sign-in-button:hover, #sign-out-button:hover {
     background-color: #334E86;  /* Slightly lighter blue when hovered */
 }
 
@@ -44,9 +45,15 @@ p {
     color: white;
 }
 
-/* Button styles when logged in (to hide the button) */
+/* Hide sign-in button when user is logged in */
 #sign-in-button:disabled {
     display: none;
+}
+
+/* Style for the sign-out button */
+#sign-out-button {
+    background-color: #D9534F;  /* Red color for sign-out button */
+    display: none; /* Hidden initially */
 }
 
 /* Styling for the login popup and the window */
