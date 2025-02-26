@@ -13,9 +13,9 @@ const firebaseConfig = {
     measurementId: "G-FY5VPQG5NZ"
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth();
+// Initialize Firebase (Make sure this is done before using any Firebase services)
+const app = initializeApp(firebaseConfig); // Make sure to initialize the app first
+const auth = getAuth(app); // Now, you can use Firebase Authentication
 
 // Sign-in with Google function
 export function signInWithGoogle() {
