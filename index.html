@@ -1,125 +1,162 @@
-// Firebase configuration (keep your existing configuration here)
-const firebaseConfig = {
-    apiKey: "AIzaSyAF8R4iNFv3oAZVOZcw5fWUPz8FScTeBXM",
-    authDomain: "musicapp-3a435.firebaseapp.com",
-    projectId: "musicapp-3a435",
-    storageBucket: "musicapp-3a435.appspot.com",
-    messagingSenderId: "224181252004",
-    appId: "1:224181252004:web:4589e9da0d6400e5fd1b31",
-    measurementId: "G-FY5VPQG5NZ"
-};
-firebase.initializeApp(firebaseConfig);
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music App</title>
 
-let player;
-let playlist = []; // Store playlist songs
-let currentSongIndex = 0; // Track current song in playlist
+    <!-- Firebase SDK (CDN links) -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
 
-// Initialize YouTube Player when API is ready
-function onYouTubeIframeAPIReady() {
-    player = new YT.Player('player', {
-        height: '390',
-        width: '640',
-        videoId: 'dQw4w9WgXcQ', // Example default video
-        events: {
-            'onStateChange': onPlayerStateChange
+    <!-- Spotify Web Playback SDK -->
+    <script src="https://sdk.scdn.co/spotify-player.js"></script>
+
+    <!-- Link to external style.css file -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Welcome to the Music App</h1>
+    <p>Listen to music, chat, and vibe together.</p>
+
+    <!-- Login with Spotify button -->
+    <button id="login-button">Login with Spotify</button>
+
+    <!-- Playback controls -->
+    <div id="playback-controls">
+        <button id="play-pause">Play/Pause</button>
+        <button id="next-track">Next</button>
+        <button id="previous-track">Previous</button>
+    </div>
+
+    <!-- Search input and button -->
+    <input type="text" id="search-input" placeholder="Search for songs..." />
+    <button id="search-button">Search</button>
+
+    <!-- Display search results -->
+    <div id="search-results"></div>
+
+    <!-- Display user info -->
+    <div id="user-info"></div>
+
+    <script>
+        // Replace this with your own Client ID and Redirect URI
+        const CLIENT_ID = '51396bbc121f4f19b0a3ac2ab8ff249f';  // Replace with your Spotify Client ID
+        const REDIRECT_URI = 'https://e-d-i-t-i-h.github.io/music-app/callback'; // Replace with your Redirect URI
+        const SCOPES = 'user-read-playback-state user-modify-playback-state playlist-read-private playlist-modify-public';
+
+        // Authentication Function
+        function authenticateUser() {
+            const authURL = `https://accounts.spotify.com/authorize?client_id=${CLIENT_ID}&response_type=token&redirect_uri=${REDIRECT_URI}&scope=${SCOPES}`;
+            window.location = authURL;
         }
-    });
-}
 
-// Handle YouTube player state change (e.g., video ended)
-function onPlayerStateChange(event) {
-    if (event.data == YT.PlayerState.ENDED) {
-        nextSong(); // Play next song when current one ends
-    }
-}
+        // Handle Authentication Redirect
+        window.onload = function() {
+            const hash = window.location.hash.substring(1).split('&').reduce(function (result, item) {
+                let parts = item.split('=');
+                result[parts[0]] = decodeURIComponent(parts[1]);
+                return result;
+            }, {});
 
-// Play current song
-function playSong() {
-    if (player) {
-        player.playVideo();
-        document.getElementById('play-button').style.display = 'none';
-        document.getElementById('pause-button').style.display = 'inline';
-    }
-}
+            const accessToken = hash.access_token;
 
-// Pause current song
-function pauseSong() {
-    if (player) {
-        player.pauseVideo();
-        document.getElementById('play-button').style.display = 'inline';
-        document.getElementById('pause-button').style.display = 'none';
-    }
-}
+            if (accessToken) {
+                localStorage.setItem('access_token', accessToken);
+                window.location.hash = '';
+                initializePlayer(accessToken);
+            } else {
+                document.getElementById('login-button').style.display = 'block';
+            }
+        }
 
-// Next song in playlist
-function nextSong() {
-    if (playlist.length > 0) {
-        currentSongIndex = (currentSongIndex + 1) % playlist.length;
-        loadSong(playlist[currentSongIndex].id);
-    }
-}
+        // Initialize the Spotify Player
+        function initializePlayer(token) {
+            const player = new Spotify.Player({
+                name: 'Web Player',
+                getOAuthToken: callback => { callback(token); },
+                volume: 0.5
+            });
 
-// Previous song in playlist
-function previousSong() {
-    if (playlist.length > 0) {
-        currentSongIndex = (currentSongIndex - 1 + playlist.length) % playlist.length;
-        loadSong(playlist[currentSongIndex].id);
-    }
-}
+            player.on('initialization_error', e => console.error(e));
+            player.on('authentication_error', e => console.error(e));
+            player.on('account_error', e => console.error(e));
+            player.on('playback_error', e => console.error(e));
 
-// Load song by video ID
-function loadSong(videoId) {
-    if (player) {
-        player.loadVideoById(videoId);
-    }
-}
+            player.on('player_state_changed', state => {
+                if (state) {
+                    console.log(state);
+                }
+            });
 
-// Search YouTube for songs
-document.getElementById('search-button').addEventListener('click', function() {
-    const query = document.getElementById('search-bar').value;
-    if (query) {
-        searchYouTube(query);
-    }
-});
+            player.connect().then(success => {
+                if (success) {
+                    console.log('The Web Playback SDK successfully connected to Spotify!');
+                    document.getElementById('playback-controls').style.display = 'block';
+                }
+            });
 
-// Use YouTube API to search for videos
-function searchYouTube(query) {
-    const youtubeSearchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${query}&type=video&key=YOUR_API_KEY`;
-    
-    fetch(youtubeSearchUrl)
-        .then(response => response.json())
-        .then(data => {
-            const videos = data.items;
-            displayPlaylist(videos);
-        })
-        .catch(err => console.error('Error fetching YouTube data:', err));
-}
+            // Play/Pause functionality
+            document.getElementById('play-pause').addEventListener('click', () => {
+                player.togglePlay().then(() => console.log('Toggled play/pause'));
+            });
 
-// Display playlist of videos
-function displayPlaylist(videos) {
-    playlist = videos.map(video => ({
-        id: video.id.videoId,
-        title: video.snippet.title,
-        thumbnail: video.snippet.thumbnails.default.url
-    }));
+            // Next track functionality
+            document.getElementById('next-track').addEventListener('click', () => {
+                player.nextTrack().then(() => console.log('Skipped to next track'));
+            });
 
-    const playlistContainer = document.getElementById('playlist');
-    playlistContainer.innerHTML = '';
-    playlist.forEach((video, index) => {
-        const listItem = document.createElement('li');
-        listItem.innerHTML = `<img src="${video.thumbnail}" alt="thumb"><span>${video.title}</span>`;
-        listItem.addEventListener('click', () => loadSong(video.id));
-        playlistContainer.appendChild(listItem);
-    });
+            // Previous track functionality
+            document.getElementById('previous-track').addEventListener('click', () => {
+                player.previousTrack().then(() => console.log('Went back to previous track'));
+            });
+        }
 
-    // Load the first song from the playlist
-    if (playlist.length > 0) {
-        loadSong(playlist[0].id);
-    }
-}
+        // Search Functionality
+        document.getElementById('search-button').addEventListener('click', () => {
+            const query = document.getElementById('search-input').value;
+            const token = localStorage.getItem('access_token');
 
-// Event listeners for play, pause, next, back buttons
-document.getElementById('play-button').addEventListener('click', playSong);
-document.getElementById('pause-button').addEventListener('click', pauseSong);
-document.getElementById('next-button').addEventListener('click', nextSong);
-document.getElementById('back-button').addEventListener('click', previousSong);
+            // Fetch search results from Spotify API
+            fetch(`https://api.spotify.com/v1/search?q=${query}&type=track&limit=10`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const tracks = data.tracks.items;
+                const resultsDiv = document.getElementById('search-results');
+                resultsDiv.innerHTML = '';
+
+                tracks.forEach(track => {
+                    const trackElement = document.createElement('div');
+                    trackElement.innerHTML = `
+                        <p>${track.name} by ${track.artists.map(artist => artist.name).join(', ')}</p>
+                        <button onclick="playTrack('${track.id}')">Play</button>
+                    `;
+                    resultsDiv.appendChild(trackElement);
+                });
+            });
+        });
+
+        // Play selected track
+        function playTrack(trackId) {
+            const token = localStorage.getItem('access_token');
+            fetch(`https://api.spotify.com/v1/me/player/play`, {
+                method: 'PUT',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    uris: [`spotify:track:${trackId}`]
+                })
+            });
+        }
+
+        // Login with Spotify Button Event
+        document.getElementById('login-button').addEventListener('click', authenticateUser);
+    </script>
+</body>
+</html>
