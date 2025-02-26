@@ -5,158 +5,186 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Music App</title>
 
-    <!-- Firebase SDK (CDN links) -->
-    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
+    <!-- Link to external style.css file -->
+    <link rel="stylesheet" href="style.css">
 
     <!-- Spotify Web Playback SDK -->
     <script src="https://sdk.scdn.co/spotify-player.js"></script>
 
-    <!-- Link to external style.css file -->
-    <link rel="stylesheet" href="style.css">
+    <!-- Firebase SDK (CDN links) -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
 </head>
 <body>
     <h1>Welcome to the Music App</h1>
-    <p>Listen to music, chat, and vibe together.</p>
+    <p>Listen to music, search, and play your favorite songs!</p>
 
-    <!-- Login with Spotify button -->
+    <!-- Google Sign-In Button -->
+    <button id="google-login-button">Sign in with Google</button>
+
+    <!-- Spotify Login Button -->
     <button id="login-button">Login with Spotify</button>
 
-    <!-- Playback controls -->
-    <div id="playback-controls">
-        <button id="play-pause">Play/Pause</button>
-        <button id="next-track">Next</button>
-        <button id="previous-track">Previous</button>
-    </div>
-
-    <!-- Search input and button -->
-    <input type="text" id="search-input" placeholder="Search for songs..." />
-    <button id="search-button">Search</button>
-
-    <!-- Display search results -->
-    <div id="search-results"></div>
-
-    <!-- Display user info -->
+    <!-- User Info (after login) -->
     <div id="user-info"></div>
 
+    <!-- Search Bar -->
+    <input type="text" id="search-input" placeholder="Search for songs...">
+    <button id="search-button">Search</button>
+
+    <!-- Search Results (songs) -->
+    <div id="search-results"></div>
+
+    <!-- Playback Controls -->
+    <div id="playback-controls">
+        <button id="prev-btn">Prev</button>
+        <button id="play-pause-btn">Play</button>
+        <button id="next-btn">Next</button>
+    </div>
+
+    <!-- Embed Spotify Player (if logged in) -->
+    <div id="spotify-player-container"></div>
+
     <script>
-        // Replace this with your own Client ID and Redirect URI
-        const CLIENT_ID = '51396bbc121f4f19b0a3ac2ab8ff249f';  // Replace with your Spotify Client ID
-        const REDIRECT_URI = 'https://e-d-i-t-i-h.github.io/music-app/callback'; // Replace with your Redirect URI
-        const SCOPES = 'user-read-playback-state user-modify-playback-state playlist-read-private playlist-modify-public';
+        // Firebase configuration for Google login
+        const firebaseConfig = {
+            apiKey: "AIzaSyAF8R4iNFv3oAZVOZcw5fWUPz8FScTeBXM",
+            authDomain: "musicapp-3a435.firebaseapp.com",
+            projectId: "musicapp-3a435",
+            storageBucket: "musicapp-3a435.appspot.com",
+            messagingSenderId: "224181252004",
+            appId: "1:224181252004:web:4589e9da0d6400e5fd1b31",
+            measurementId: "G-FY5VPQG5NZ"
+        };
 
-        // Authentication Function
-        function authenticateUser() {
-            const authURL = `https://accounts.spotify.com/authorize?client_id=${CLIENT_ID}&response_type=token&redirect_uri=${REDIRECT_URI}&scope=${SCOPES}`;
-            window.location = authURL;
-        }
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
 
-        // Handle Authentication Redirect
-        window.onload = function() {
-            const hash = window.location.hash.substring(1).split('&').reduce(function (result, item) {
-                let parts = item.split('=');
-                result[parts[0]] = decodeURIComponent(parts[1]);
-                return result;
-            }, {});
+        // Spotify API setup
+        const clientId = 'YOUR_SPOTIFY_CLIENT_ID'; // Replace with your actual Spotify client ID
+        const redirectUri = 'YOUR_REDIRECT_URI'; // Replace with your redirect URI
+        const authEndpoint = 'https://accounts.spotify.com/authorize';
+        const scopes = 'user-library-read user-read-playback-state user-modify-playback-state playlist-read-private playlist-read-collaborative';
 
-            const accessToken = hash.access_token;
+        let accessToken = '';
+        let player;
 
-            if (accessToken) {
-                localStorage.setItem('access_token', accessToken);
-                window.location.hash = '';
-                initializePlayer(accessToken);
-            } else {
-                document.getElementById('login-button').style.display = 'block';
+        // Check if the user is authenticated
+        function getAccessToken() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get('access_token');
+            if (token) {
+                accessToken = token;
+                window.history.pushState('', '', window.location.pathname); // Remove the token from the URL
+                document.getElementById('user-info').innerText = 'Logged in!';
+                document.getElementById('login-button').style.display = 'none';
+                initializeSpotifyPlayer();
             }
         }
 
-        // Initialize the Spotify Player
-        function initializePlayer(token) {
-            const player = new Spotify.Player({
-                name: 'Web Player',
-                getOAuthToken: callback => { callback(token); },
-                volume: 0.5
+        // Handle Login with Google
+        document.getElementById('google-login-button').addEventListener('click', () => {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            firebase.auth().signInWithPopup(provider).then((result) => {
+                const user = result.user;
+                document.getElementById('user-info').innerText = `Logged in as: ${user.displayName}`;
+                document.getElementById('google-login-button').style.display = 'none';
+            }).catch((error) => {
+                console.error("Error signing in with Google: ", error);
             });
+        });
 
-            player.on('initialization_error', e => console.error(e));
-            player.on('authentication_error', e => console.error(e));
-            player.on('account_error', e => console.error(e));
-            player.on('playback_error', e => console.error(e));
+        // Handle Login with Spotify
+        document.getElementById('login-button').addEventListener('click', () => {
+            window.location.href = `${authEndpoint}?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scopes}&response_type=token&show_dialog=true`;
+        });
 
-            player.on('player_state_changed', state => {
-                if (state) {
-                    console.log(state);
-                }
-            });
+        // Initialize the Spotify Web Playback SDK
+        function initializeSpotifyPlayer() {
+            if (!accessToken) return;
 
-            player.connect().then(success => {
-                if (success) {
-                    console.log('The Web Playback SDK successfully connected to Spotify!');
-                    document.getElementById('playback-controls').style.display = 'block';
-                }
-            });
+            window.onSpotifyWebPlaybackSDKReady = () => {
+                player = new Spotify.Player({
+                    name: 'Music App Player',
+                    getOAuthToken: cb => { cb(accessToken); },
+                    volume: 0.5
+                });
 
-            // Play/Pause functionality
-            document.getElementById('play-pause').addEventListener('click', () => {
-                player.togglePlay().then(() => console.log('Toggled play/pause'));
-            });
+                player.connect().then(success => {
+                    if (success) {
+                        console.log('Spotify player connected');
+                    }
+                });
 
-            // Next track functionality
-            document.getElementById('next-track').addEventListener('click', () => {
-                player.nextTrack().then(() => console.log('Skipped to next track'));
-            });
+                // Handle play/pause button
+                document.getElementById('play-pause-btn').addEventListener('click', () => {
+                    player.togglePlay();
+                });
 
-            // Previous track functionality
-            document.getElementById('previous-track').addEventListener('click', () => {
-                player.previousTrack().then(() => console.log('Went back to previous track'));
-            });
+                // Handle next button
+                document.getElementById('next-btn').addEventListener('click', () => {
+                    player.nextTrack();
+                });
+
+                // Handle previous button
+                document.getElementById('prev-btn').addEventListener('click', () => {
+                    player.previousTrack();
+                });
+            };
         }
 
-        // Search Functionality
-        document.getElementById('search-button').addEventListener('click', () => {
-            const query = document.getElementById('search-input').value;
-            const token = localStorage.getItem('access_token');
-
-            // Fetch search results from Spotify API
-            fetch(`https://api.spotify.com/v1/search?q=${query}&type=track&limit=10`, {
+        // Search for songs on Spotify
+        function searchSongs(query) {
+            fetch(`https://api.spotify.com/v1/search?q=${query}&type=track`, {
                 headers: {
-                    Authorization: `Bearer ${token}`
+                    'Authorization': `Bearer ${accessToken}`
                 }
             })
             .then(response => response.json())
             .then(data => {
-                const tracks = data.tracks.items;
-                const resultsDiv = document.getElementById('search-results');
-                resultsDiv.innerHTML = '';
-
-                tracks.forEach(track => {
-                    const trackElement = document.createElement('div');
-                    trackElement.innerHTML = `
-                        <p>${track.name} by ${track.artists.map(artist => artist.name).join(', ')}</p>
-                        <button onclick="playTrack('${track.id}')">Play</button>
+                const results = data.tracks.items;
+                const resultsContainer = document.getElementById('search-results');
+                resultsContainer.innerHTML = '';
+                results.forEach(song => {
+                    const songElement = document.createElement('div');
+                    songElement.classList.add('song-item');
+                    songElement.innerHTML = `
+                        <div>
+                            <img src="${song.album.images[0].url}" alt="${song.name}" width="50">
+                            <span>${song.name} - ${song.artists[0].name}</span>
+                        </div>
+                        <button class="play-song" data-uri="${song.uri}">Play</button>
                     `;
-                    resultsDiv.appendChild(trackElement);
+                    resultsContainer.appendChild(songElement);
                 });
-            });
-        });
 
-        // Play selected track
-        function playTrack(trackId) {
-            const token = localStorage.getItem('access_token');
-            fetch(`https://api.spotify.com/v1/me/player/play`, {
-                method: 'PUT',
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    uris: [`spotify:track:${trackId}`]
-                })
+                // Add event listeners for play buttons in the search results
+                const playButtons = document.querySelectorAll('.play-song');
+                playButtons.forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const songUri = e.target.getAttribute('data-uri');
+                        playSong(songUri);
+                    });
+                });
             });
         }
 
-        // Login with Spotify Button Event
-        document.getElementById('login-button').addEventListener('click', authenticateUser);
+        // Play selected song
+        function playSong(uri) {
+            player.play({ uris: [uri] });
+            document.getElementById('play-pause-btn').innerText = 'Pause';
+        }
+
+        // Handle search button click
+        document.getElementById('search-button').addEventListener('click', () => {
+            const query = document.getElementById('search-input').value;
+            if (query) {
+                searchSongs(query);
+            }
+        });
+
+        // Check if the access token exists on page load
+        getAccessToken();
     </script>
 </body>
 </html>
