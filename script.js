@@ -1,6 +1,6 @@
-// Firebase configuration
+// Firebase configuration (replace with your own Firebase credentials)
 const firebaseConfig = {
-    apiKey: "AIzaSyAF8R4iNFv3oAZVOZcw5fWUPz8FScTeBXM",  // Replace with your Firebase API Key
+    apiKey: "YOUR_API_KEY",  // Replace with your Firebase API Key
     authDomain: "musicapp-3a435.firebaseapp.com",
     projectId: "musicapp-3a435",
     storageBucket: "musicapp-3a435.appspot.com",
