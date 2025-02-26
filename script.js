@@ -1,26 +1,44 @@
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
+// Import Firebase SDK
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
+import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
 
-// Initialize Firebase Authentication
+// Your Firebase config
+const firebaseConfig = {
+    apiKey: "AIzaSyAF8R4iNFv3oAZVOZcw5fWUPz8FScTeBXM",
+    authDomain: "musicapp-3a435.firebaseapp.com",
+    projectId: "musicapp-3a435",
+    storageBucket: "musicapp-3a435.appspot.com",
+    messagingSenderId: "224181252004",
+    appId: "1:224181252004:web:4589e9da0d6400e5fd1b31",
+    measurementId: "G-FY5VPQG5NZ"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 
-// Keep the user signed in even after page refresh
-auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-  .then(() => {
-    // This is where you continue with your sign-in logic
-  })
-  .catch((error) => {
-    console.error("Persistence error:", error);
-  });
+// Sign-in with Google function
+export function signInWithGoogle() {
+    const provider = new GoogleAuthProvider();
+    signInWithPopup(auth, provider)
+        .then((result) => {
+            const user = result.user;
+            console.log("User signed in: ", user.displayName);
+        })
+        .catch((error) => {
+            console.error("Error during sign-in: ", error.message);
+        });
+}
 
-// Listen for changes to the user's sign-in state (this runs on page refresh too)
+// Check if the user is signed in
 onAuthStateChanged(auth, (user) => {
-  if (user) {
-    // User is signed in
-    document.getElementById("user-info").innerText = "Logged in as: " + user.displayName;
-    document.getElementById("sign-in-button").style.display = "none"; // Hide the sign-in button
-  } else {
-    // User is signed out
-    document.getElementById("user-info").innerText = "";
-    document.getElementById("sign-in-button").style.display = "block"; // Show the sign-in button
-  }
+    if (user) {
+        // If user is logged in, show their name and hide the sign-in button
+        document.getElementById("user-info").innerText = "Logged in as: " + user.displayName;
+        document.getElementById("sign-in-button").style.display = "none";
+    } else {
+        // If no user is logged in, show the sign-in button
+        document.getElementById("user-info").innerText = "";
+        document.getElementById("sign-in-button").style.display = "block";
+    }
 });
