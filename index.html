@@ -4,20 +4,84 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Music App</title>
+
+    <!-- Firebase SDK (CDN links) -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
+
+    <!-- Link to external style.css file -->
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Sign In Button -->
-    <button id="sign-in-button" onclick="signInWithGoogle()">Sign in with Google</button>
+    <h1>Welcome to the Music App</h1>
+    <p>Listen to music, chat, and vibe together.</p>
 
-    <!-- User Info Display -->
-    <div id="user-info" style="display: none;">
-        <p id="user-name"></p>
-        <button id="sign-out-button" onclick="signOutUser()" style="display: none;">Sign Out</button>
-    </div>
+    <!-- Sign-in Button -->
+    <button id="sign-in-button">Sign in with Google</button>
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js"></script>
-    <script src="script.js"></script>
+    <!-- Sign-out Button -->
+    <button id="sign-out-button" style="display: none;">Sign Out</button>
+
+    <!-- Display user info -->
+    <div id="user-info"></div>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAF8R4iNFv3oAZVOZcw5fWUPz8FScTeBXM",
+            authDomain: "musicapp-3a435.firebaseapp.com",
+            projectId: "musicapp-3a435",
+            storageBucket: "musicapp-3a435.appspot.com",
+            messagingSenderId: "224181252004",
+            appId: "1:224181252004:web:4589e9da0d6400e5fd1b31",
+            measurementId: "G-FY5VPQG5NZ"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        // Google Sign-In function
+        const signInWithGoogle = () => {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            firebase.auth().signInWithPopup(provider).then((result) => {
+                const user = result.user;
+                // Update the user-info div to display the logged-in user's name
+                document.getElementById('user-info').innerText = `Logged in as: ${user.displayName}`;
+                // Hide the sign-in button after successful login
+                document.getElementById('sign-in-button').style.display = 'none';
+                // Show the sign-out button
+                document.getElementById('sign-out-button').style.display = 'inline-block';
+            }).catch((error) => {
+                console.error("Error signing in: ", error);
+            });
+        };
+
+        // Sign out function
+        const signOutUser = () => {
+            firebase.auth().signOut().then(() => {
+                // Clear user info and reset buttons
+                document.getElementById('user-info').innerText = '';
+                document.getElementById('sign-in-button').style.display = 'inline-block';
+                document.getElementById('sign-out-button').style.display = 'none';
+            }).catch((error) => {
+                console.error("Error signing out: ", error);
+            });
+        };
+
+        // Event listener for the sign-in button
+        document.getElementById('sign-in-button').addEventListener('click', signInWithGoogle);
+
+        // Event listener for the sign-out button
+        document.getElementById('sign-out-button').addEventListener('click', signOutUser);
+
+        // Check if the user is already signed in
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                document.getElementById('user-info').innerText = `Logged in as: ${user.displayName}`;
+                document.getElementById('sign-in-button').style.display = 'none';
+                document.getElementById('sign-out-button').style.display = 'inline-block';
+            }
+        });
+    </script>
 </body>
 </html>
