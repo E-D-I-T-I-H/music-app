@@ -1,49 +1,72 @@
-/* Reset some default styles */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-/* Body styles */
+/* General styles for the page */
 body {
-    background-color: #f4f4f4;
-    font-family: Arial, sans-serif;
+    background-color: #000000;  /* Black background */
+    color: white;                /* White text */
+    font-family: Arial, sans-serif; /* Font family */
     text-align: center;
-    color: #333;
     padding: 20px;
+    margin: 0;
 }
 
-/* Heading styles */
+/* Header styles */
 h1 {
-    font-size: 2.5rem;
+    font-size: 3rem;
     font-weight: bold;
-    color: #333;
-}
-
-p {
-    font-size: 1.2rem;
-    margin: 10px 0;
-}
-
-/* Sign-in button styles */
-#sign-in-button {
-    background-color: #4CAF50; /* Green */
     color: white;
-    padding: 15px 32px;
-    font-size: 16px;
+}
+
+/* Paragraph text styles */
+p {
+    font-size: 1.5rem;
+    color: white;
+}
+
+/* Button styles */
+#sign-in-button {
+    background-color: #1E3A8A;  /* Dark blue button */
+    color: white;
+    font-size: 1.2rem;
+    padding: 15px 30px;
     border: none;
-    border-radius: 5px;
+    border-radius: 8px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s;
 }
 
 #sign-in-button:hover {
-    background-color: #45a049; /* Darker Green */
+    background-color: #334E86;  /* Slightly lighter blue when hovered */
 }
 
-/* User info display */
+/* User info display style */
 #user-info {
     margin-top: 20px;
-    font-size: 1.2rem;
+    font-size: 1.5rem;
+    color: white;
+}
+
+/* Button styles when logged in (to hide the button) */
+#sign-in-button:disabled {
+    display: none;
+}
+
+/* Styling for the login popup and the window */
+#firebaseui-auth-container {
+    margin: 0 auto;
+    padding: 20px;
+    max-width: 400px;
+    background-color: #1a202c; /* Dark theme background */
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+}
+
+/* Styling the text and errors on sign-in */
+.firebaseui-error {
+    color: red;
+    font-size: 1rem;
+    margin-top: 10px;
+}
+
+.firebaseui-idp-icon {
+    width: 50px;
+    height: 50px;
 }
