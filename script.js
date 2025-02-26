@@ -1,6 +1,6 @@
-// Firebase configuration (replace with your own Firebase credentials)
+// Firebase configuration (updated with your API Key)
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",  // Replace with your Firebase API Key
+    apiKey: "AIzaSyAF8R4iNFv3oAZVOZcw5fWUPz8FScTeBXM",  // Your Firebase API Key
     authDomain: "musicapp-3a435.firebaseapp.com",
     projectId: "musicapp-3a435",
     storageBucket: "musicapp-3a435.appspot.com",
@@ -16,6 +16,7 @@ const auth = firebase.auth();
 // Sign-In with Google
 function signInWithGoogle() {
     const provider = new firebase.auth.GoogleAuthProvider();
+
     auth.signInWithPopup(provider).then((result) => {
         const user = result.user;
         document.getElementById("user-name").textContent = user.displayName;
@@ -23,7 +24,9 @@ function signInWithGoogle() {
         document.getElementById("sign-out-button").style.display = "inline-block";
         document.getElementById("user-info").style.display = "block";
     }).catch((error) => {
-        console.error("Error signing in: ", error);
+        // Firebase error handling
+        console.error("Error signing in: ", error.message);
+        alert("Error during sign-in. Please try again.");
     });
 }
 
@@ -35,6 +38,7 @@ function signOutUser() {
         document.getElementById("user-info").style.display = "none";
     }).catch((error) => {
         console.error("Error signing out: ", error);
+        alert("Error during sign-out. Please try again.");
     });
 }
 
