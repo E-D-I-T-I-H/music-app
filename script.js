@@ -1,10 +1,6 @@
-// Import Firebase SDK
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
-import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
-
-// Your Firebase config
+// Firebase configuration
 const firebaseConfig = {
-    apiKey: "AIzaSyAF8R4iNFv3oAZVOZcw5fWUPz8FScTeBXM",
+    apiKey: "YOUR_API_KEY",  // Replace with your Firebase API Key
     authDomain: "musicapp-3a435.firebaseapp.com",
     projectId: "musicapp-3a435",
     storageBucket: "musicapp-3a435.appspot.com",
@@ -13,32 +9,45 @@ const firebaseConfig = {
     measurementId: "G-FY5VPQG5NZ"
 };
 
-// Initialize Firebase (Make sure this is done before using any Firebase services)
-const app = initializeApp(firebaseConfig); // Make sure to initialize the app first
-const auth = getAuth(app); // Now, you can use Firebase Authentication
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
 
-// Sign-in with Google function
-export function signInWithGoogle() {
-    const provider = new GoogleAuthProvider();
-    signInWithPopup(auth, provider)
-        .then((result) => {
-            const user = result.user;
-            console.log("User signed in: ", user.displayName);
-        })
-        .catch((error) => {
-            console.error("Error during sign-in: ", error.message);
-        });
+// Sign-In with Google
+function signInWithGoogle() {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider).then((result) => {
+        const user = result.user;
+        document.getElementById("user-name").textContent = user.displayName;
+        document.getElementById("sign-in-button").style.display = "none";
+        document.getElementById("sign-out-button").style.display = "inline-block";
+        document.getElementById("user-info").style.display = "block";
+    }).catch((error) => {
+        console.error("Error signing in: ", error);
+    });
 }
 
-// Check if the user is signed in
-onAuthStateChanged(auth, (user) => {
+// Sign-Out
+function signOutUser() {
+    auth.signOut().then(() => {
+        document.getElementById("sign-in-button").style.display = "inline-block";
+        document.getElementById("sign-out-button").style.display = "none";
+        document.getElementById("user-info").style.display = "none";
+    }).catch((error) => {
+        console.error("Error signing out: ", error);
+    });
+}
+
+// Monitor auth state changes
+auth.onAuthStateChanged((user) => {
     if (user) {
-        // If user is logged in, show their name and hide the sign-in button
-        document.getElementById("user-info").innerText = "Logged in as: " + user.displayName;
+        document.getElementById("user-name").textContent = user.displayName;
         document.getElementById("sign-in-button").style.display = "none";
+        document.getElementById("sign-out-button").style.display = "inline-block";
+        document.getElementById("user-info").style.display = "block";
     } else {
-        // If no user is logged in, show the sign-in button
-        document.getElementById("user-info").innerText = "";
-        document.getElementById("sign-in-button").style.display = "block";
+        document.getElementById("sign-in-button").style.display = "inline-block";
+        document.getElementById("sign-out-button").style.display = "none";
+        document.getElementById("user-info").style.display = "none";
     }
 });
