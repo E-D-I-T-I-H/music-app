@@ -41,6 +41,7 @@
     <div id="playback-controls">
         <button id="prev-btn">Prev</button>
         <button id="play-pause-btn">Play</button>
+        <input type="range" id="seek-bar" min="0" max="100" value="0">
         <button id="next-btn">Next</button>
     </div>
 
@@ -63,7 +64,7 @@
         firebase.initializeApp(firebaseConfig);
 
         // Spotify API setup
-        const clientId = '51396bbc121f4f19b0a3ac2ab8ff249f'; // Your Spotify client ID
+        const clientId = '51396bbc121f4f19b0a3ac2ab8ff249f';
         const redirectUri = window.location.origin + '/music-app';
         const authEndpoint = 'https://accounts.spotify.com/authorize';
         const scopes = 'user-library-read user-read-playback-state user-modify-playback-state playlist-read-private playlist-read-collaborative';
@@ -71,29 +72,24 @@
         let accessToken = localStorage.getItem('spotify_token');
         let player;
 
-        // Handle Login with Google
+        // Google Login
         document.getElementById('google-login-button').addEventListener('click', () => {
             const provider = new firebase.auth.GoogleAuthProvider();
-            firebase.auth().signInWithPopup(provider).then((result) => {
+            firebase.auth().signInWithPopup(provider).then(result => {
                 const user = result.user;
                 localStorage.setItem('google_user', JSON.stringify(user));
                 updateGoogleUI(user);
-            }).catch((error) => {
-                console.error("Google Sign-In Error: ", error);
-            });
+            }).catch(error => console.error("Google Sign-In Error: ", error));
         });
 
-        // Handle Logout with Google
+        // Google Logout
         document.getElementById('google-logout-button').addEventListener('click', () => {
             firebase.auth().signOut().then(() => {
                 localStorage.removeItem('google_user');
                 updateGoogleUI(null);
-            }).catch((error) => {
-                console.error("Google Sign-Out Error: ", error);
-            });
+            }).catch(error => console.error("Google Sign-Out Error: ", error));
         });
 
-        // Update Google UI
         function updateGoogleUI(user) {
             if (user) {
                 document.getElementById('user-info').innerText = `Logged in as: ${user.displayName}`;
@@ -106,24 +102,21 @@
             }
         }
 
-        // Check Google Login State on Page Load
+        // Check Google Login on Page Load
         const savedGoogleUser = localStorage.getItem('google_user');
-        if (savedGoogleUser) {
-            updateGoogleUI(JSON.parse(savedGoogleUser));
-        }
+        if (savedGoogleUser) updateGoogleUI(JSON.parse(savedGoogleUser));
 
-        // Handle Login with Spotify
+        // Spotify Login
         document.getElementById('spotify-login-button').addEventListener('click', () => {
             window.location.href = `${authEndpoint}?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scopes}&response_type=token&show_dialog=true`;
         });
 
-        // Handle Logout with Spotify
+        // Spotify Logout
         document.getElementById('spotify-logout-button').addEventListener('click', () => {
             localStorage.removeItem('spotify_token');
             updateSpotifyUI(null);
         });
 
-        // Check Spotify Token in URL
         function getAccessToken() {
             const urlParams = new URLSearchParams(window.location.hash.substring(1));
             const token = urlParams.get('access_token');
@@ -132,58 +125,34 @@
                 accessToken = token;
                 window.history.replaceState({}, document.title, window.location.pathname);
                 updateSpotifyUI(token);
-            } else if (accessToken) {
-                updateSpotifyUI(accessToken);
-            }
+            } else if (accessToken) updateSpotifyUI(accessToken);
         }
 
-        // Update Spotify UI
         function updateSpotifyUI(token) {
-            if (token) {
-                document.getElementById('spotify-login-button').style.display = 'none';
-                document.getElementById('spotify-logout-button').style.display = 'block';
-                document.getElementById('user-info').innerText = 'Logged into Spotify!';
-                initializeSpotifyPlayer();
-            } else {
-                document.getElementById('spotify-login-button').style.display = 'block';
-                document.getElementById('spotify-logout-button').style.display = 'none';
-                document.getElementById('user-info').innerText = '';
-            }
+            document.getElementById('spotify-login-button').style.display = token ? 'none' : 'block';
+            document.getElementById('spotify-logout-button').style.display = token ? 'block' : 'none';
+            document.getElementById('user-info').innerText = token ? 'Logged into Spotify!' : '';
+            if (token) initializeSpotifyPlayer();
         }
 
-        // Initialize the Spotify Web Playback SDK
         function initializeSpotifyPlayer() {
             if (!accessToken) return;
-
             window.onSpotifyWebPlaybackSDKReady = () => {
                 player = new Spotify.Player({
                     name: 'Music App Player',
-                    getOAuthToken: cb => { cb(accessToken); },
+                    getOAuthToken: cb => cb(accessToken),
                     volume: 0.5
                 });
-
-                player.connect().then(success => {
-                    if (success) {
-                        console.log('Spotify player connected');
-                    }
-                });
-
-                // Handle playback controls
-                document.getElementById('play-pause-btn').addEventListener('click', () => {
-                    player.togglePlay();
-                });
-
-                document.getElementById('next-btn').addEventListener('click', () => {
-                    player.nextTrack();
-                });
-
-                document.getElementById('prev-btn').addEventListener('click', () => {
-                    player.previousTrack();
-                });
+                player.connect();
             };
         }
 
-        // Check for Spotify Token on Page Load
+        // Update seek bar
+        document.getElementById('seek-bar').addEventListener('input', (e) => {
+            const seekTo = e.target.value;
+            if (player) player.seek(seekTo * 1000);
+        });
+
         getAccessToken();
     </script>
 </body>
