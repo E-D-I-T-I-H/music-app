@@ -1,4 +1,4 @@
-/* General Styles */
+/* General Page Styles */
 body {
     font-family: Arial, sans-serif;
     background-color: #181818;
@@ -10,50 +10,31 @@ body {
     height: 100vh;
 }
 
-/* Top Section: YouTube Player & Auth (Left) */
+/* --- TOP CONTAINER: YouTube Player + Search + Controls --- */
 #top-container {
     display: flex;
-    justify-content: flex-start;  /* Aligns everything to the left */
+    justify-content: space-between;
     align-items: flex-start;
     width: 100%;
     padding: 15px;
 }
 
-/* Left Side: YouTube Player + Controls */
+/* --- LEFT: YouTube Player & Controls --- */
 #left-container {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+}
+
+/* YouTube Player */
+#player {
     width: 400px;
-}
-
-/* Sign-in/Sign-out Moved to Left */
-#auth-container {
-    margin-top: 10px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-#login-btn, #logout-btn {
-    background: none;
-    border: 1px solid white;
-    color: white;
-    padding: 6px 12px;
-    cursor: pointer;
-    border-radius: 5px;
-}
-
-#login-btn:hover, #logout-btn:hover {
-    background-color: white;
-    color: black;
+    height: 225px;
 }
 
 /* Search Bar */
 #search-container {
     margin-top: 10px;
-    display: flex;
-    width: 100%;
 }
 
 #search-input {
@@ -77,21 +58,31 @@ body {
     background-color: #e03d00;
 }
 
-/* Playback Controls - Properly Below YouTube Player */
+/* --- SEEK BAR & BUTTONS --- */
 #controls-container {
+    margin-top: 15px;
     display: flex;
     flex-direction: column;
-    align-items: flex-start; /* Aligns everything to the left */
-    margin-top: 15px;
+    align-items: flex-start;
 }
 
-/* Seek Bar & Buttons */
+/* Seek Bar & Prev/Next Buttons */
 #seek-bar-container {
     display: flex;
     align-items: center;
     gap: 15px;
 }
 
+/* Seek Bar */
+#seek-bar {
+    width: 250px;
+    height: 5px;
+    background: #555;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/* Prev/Next Buttons */
 #prev-btn, #next-btn {
     background: none;
     border: none;
@@ -104,18 +95,11 @@ body {
     opacity: 0.7;
 }
 
-#seek-bar {
-    width: 250px;
-    height: 5px;
-    background: #555;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-/* Play/Pause Button (Now Properly Below Seek Bar, Aligned Left) */
+/* Play/Pause Button (Centered Below Seek Bar) */
 #play-pause-container {
     margin-top: 10px;
-    align-self: flex-start;  /* Aligns left under the seek bar */
+    text-align: center;
+    width: 100%;
 }
 
 #play-pause-btn {
@@ -128,4 +112,25 @@ body {
 
 #play-pause-btn:hover {
     opacity: 0.7;
+}
+
+/* --- RIGHT: Sign In/Sign Out --- */
+#auth-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#login-btn, #logout-btn {
+    background: none;
+    border: 1px solid white;
+    color: white;
+    padding: 6px 12px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+#login-btn:hover, #logout-btn:hover {
+    background-color: white;
+    color: black;
 }
