@@ -120,11 +120,14 @@ body {
 
 /* --- RIGHT: Sign In/Sign Out (Moved to Rightmost Side) --- */
 #auth-container {
+    position: absolute;
+    top: 15px;
+    right: 15px;
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-left: auto; /* Pushes to rightmost side */
 }
+
 
 #login-btn, #logout-btn {
     background: none;
