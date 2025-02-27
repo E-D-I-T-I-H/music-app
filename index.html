@@ -70,17 +70,32 @@
         let player;
 
         // Check if the user is authenticated
-        function getAccessToken() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const token = urlParams.get('access_token');
-            if (token) {
-                accessToken = token;
-                window.history.pushState('', '', window.location.pathname); // Remove the token from the URL
-                document.getElementById('user-info').innerText = 'Logged in!';
-                document.getElementById('login-button').style.display = 'none';
-                initializeSpotifyPlayer();
-            }
+       function getAccessToken() {
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const token = hashParams.get('access_token');
+
+    if (token) {
+        accessToken = token;
+        window.history.replaceState({}, document.title, window.location.pathname); // Clean URL
+
+        document.getElementById('user-info').innerText = 'Logged in!';
+        document.getElementById('login-button').style.display = 'none';
+        
+        // Store token in localStorage so it persists after page reload
+        localStorage.setItem('spotify_access_token', token);
+
+        initializeSpotifyPlayer();
+    } else {
+        // If no token in URL, check localStorage (user might have refreshed the page)
+        const storedToken = localStorage.getItem('spotify_access_token');
+        if (storedToken) {
+            accessToken = storedToken;
+            document.getElementById('user-info').innerText = 'Logged in!';
+            document.getElementById('login-button').style.display = 'none';
+            initializeSpotifyPlayer();
         }
+    }
+}
 
         // Handle Login with Google
         document.getElementById('google-login-button').addEventListener('click', () => {
