@@ -1,136 +1,119 @@
-/* General Page Styling */
-body {
-    font-family: Arial, sans-serif;
-    background-color: #121212;
-    color: white;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    overflow: hidden;
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Sync</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://apis.google.com/js/api.js"></script>
+</head>
+<body>
+    <div id="main-container">
+        <!-- Left Section: YouTube Player -->
+        <div id="video-container">
+            <div id="video-player"></div>
+        </div>
 
-/* Main Layout */
-#main-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    height: 100vh;
-    padding: 20px;
-}
+        <!-- Center Section: Playback Controls -->
+        <div id="controls-container">
+            <div id="seek-bar-container">
+                <button id="prev-btn">«</button>
+                <input type="range" id="seek-bar" value="0">
+                <button id="next-btn">»</button>
+            </div>
+            <div id="play-pause-container">
+                <button id="play-pause-btn">▶</button>
+            </div>
+            <div id="search-container">
+                <input type="text" id="search-input" placeholder="Search YouTube...">
+                <button id="search-button">Search</button>
+            </div>
+        </div>
 
-/* Left Section (YouTube Player) */
-#video-container {
-    flex: 2;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-}
+        <!-- Right Section: Authentication -->
+        <div id="auth-container">
+            <button id="login-btn">Sign In</button>
+            <button id="logout-btn" style="display:none;">Sign Out</button>
+        </div>
+    </div>
 
-#video-player {
-    width: 480px;
-    height: 270px;
-    border-radius: 8px;
-}
+    <script>
+        let player;
+        let isPlaying = false;
 
-/* Middle Section (Controls) */
-#controls-container {
-    flex: 2;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('video-player', {
+                height: '270',
+                width: '480',
+                playerVars: { 'autoplay': 0, 'controls': 0 },
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange
+                }
+            });
+        }
 
-/* Seek Bar with Prev & Next */
-#seek-bar-container {
-    display: flex;
-    align-items: center;
-    width: 300px;
-}
+        function onPlayerReady(event) {
+            document.getElementById("play-pause-btn").addEventListener("click", togglePlayPause);
+            document.getElementById("prev-btn").addEventListener("click", () => console.log("Prev Clicked"));
+            document.getElementById("next-btn").addEventListener("click", () => console.log("Next Clicked"));
+        }
 
-#prev-btn, #next-btn {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 24px;
-    cursor: pointer;
-    padding: 5px 10px;
-}
+        function onPlayerStateChange(event) {
+            if (event.data == YT.PlayerState.PLAYING) {
+                isPlaying = true;
+                document.getElementById("play-pause-btn").textContent = "⏸";
+            } else {
+                isPlaying = false;
+                document.getElementById("play-pause-btn").textContent = "▶";
+            }
+        }
 
-#seek-bar {
-    flex: 1;
-    appearance: none;
-    height: 5px;
-    background: #444;
-    border-radius: 5px;
-    outline: none;
-    cursor: pointer;
-}
+        function togglePlayPause() {
+            if (isPlaying) {
+                player.pauseVideo();
+            } else {
+                player.playVideo();
+            }
+        }
 
-#seek-bar::-webkit-slider-thumb {
-    appearance: none;
-    width: 12px;
-    height: 12px;
-    background: white;
-    border-radius: 50%;
-    cursor: pointer;
-}
+        document.getElementById("search-button").addEventListener("click", function () {
+            let query = document.getElementById("search-input").value;
+            searchYouTube(query);
+        });
 
-/* Play/Pause Button Below Seek Bar */
-#play-pause-container {
-    margin-top: 10px;
-}
+        function searchYouTube(query) {
+            gapi.client.init({
+                apiKey: "AIzaSyBFfY5CZScu8FdE2oLjaCTQ3H5WbAQXos8",
+                discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest"]
+            }).then(function () {
+                return gapi.client.youtube.search.list({
+                    part: "snippet",
+                    q: query,
+                    type: "video",
+                    maxResults: 1
+                });
+            }).then(function (response) {
+                let videoId = response.result.items[0].id.videoId;
+                player.loadVideoById(videoId);
+            }).catch(function (err) {
+                console.error("YouTube Search Error:", err);
+            });
+        }
 
-#play-pause-btn {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 28px;
-    cursor: pointer;
-}
+        gapi.load("client");
 
-/* Search Bar */
-#search-container {
-    margin-top: 20px;
-}
+        document.getElementById("login-btn").addEventListener("click", function () {
+            console.log("Login Clicked");
+        });
 
-#search-input {
-    padding: 8px;
-    border-radius: 4px;
-    border: none;
-    width: 200px;
-}
+        document.getElementById("logout-btn").addEventListener("click", function () {
+            console.log("Logout Clicked");
+        });
 
-#search-button {
-    padding: 8px 12px;
-    margin-left: 5px;
-    border-radius: 4px;
-    border: none;
-    background-color: darkblue;
-    color: white;
-    cursor: pointer;
-}
-
-/* Right Section (Authentication) */
-#auth-container {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-}
-
-button {
-    background-color: darkblue;
-    border: none;
-    padding: 8px 12px;
-    color: white;
-    cursor: pointer;
-    border-radius: 4px;
-    margin: 5px;
-}
-
-button:hover {
-    background-color: #1a1aff;
-}
+        let tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        document.head.appendChild(tag);
+    </script>
+</body>
+</html>
