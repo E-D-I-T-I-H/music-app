@@ -46,8 +46,9 @@ body {
 .seek-bar-container {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     width: 300px;
+    gap: 10px; /* Adds space between prev, seek bar, and next */
 }
 #prev-btn, #next-btn {
     background: none;
@@ -70,6 +71,8 @@ body {
 
 /* Play/Pause Button (Centered Below Seek Bar) */
 .play-pause-container {
+    display: flex;
+    justify-content: center;
     margin-top: 5px;
 }
 #play-pause-btn {
