@@ -97,17 +97,33 @@
     }
 }
 
+        
         // Handle Login with Google
-        document.getElementById('google-login-button').addEventListener('click', () => {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            firebase.auth().signInWithPopup(provider).then((result) => {
-                const user = result.user;
-                document.getElementById('user-info').innerText = `Logged in as: ${user.displayName}`;
-                document.getElementById('google-login-button').style.display = 'none';
-            }).catch((error) => {
-                console.error("Error signing in with Google: ", error);
-            });
-        });
+document.getElementById('google-login-button').addEventListener('click', () => {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    firebase.auth().signInWithPopup(provider).then((result) => {
+        const user = result.user;
+        updateUI(user);
+    }).catch((error) => {
+        console.error("Error signing in with Google: ", error);
+    });
+});
+
+// Listen for authentication state changes
+firebase.auth().onAuthStateChanged((user) => {
+    if (user) {
+        updateUI(user); // User is signed in
+    } else {
+        console.log("No user logged in");
+    }
+});
+
+// Function to update UI when user is logged in
+function updateUI(user) {
+    document.getElementById('user-info').innerText = `Logged in as: ${user.displayName}`;
+    document.getElementById('google-login-button').style.display = 'none';
+}
+
 
         // Handle Login with Spotify
         document.getElementById('login-button').addEventListener('click', () => {
