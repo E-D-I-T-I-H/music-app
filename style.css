@@ -1,166 +1,130 @@
-/* General Styles */
+/* General styles */
 body {
     font-family: Arial, sans-serif;
-    background-color: #121212;
-    color: #fff;
+    background-color: #000;
+    color: white;
     margin: 0;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-}
-
-/* Main Layout */
-.container {
-    display: flex;
-    width: 100%;
-    max-width: 1200px;
-    justify-content: flex-start;
-}
-
-/* Video Player (Left) */
-.left-section {
-    flex: 2;
-    max-width: 60%;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-}
-#youtube-player {
-    width: 640px;
-    height: 360px;
-    background: #000;
-    border-radius: 10px;
-    overflow: hidden;
-}
-
-/* Playback Controls */
-.bottom-controls {
+    padding: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
+}
+
+/* Video player */
+#video-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 80%;
+    margin-top: 20px;
+}
+
+#video-player {
+    width: 480px;
+    height: 270px;
+    border-radius: 8px;
+}
+
+/* Controls Container */
+#controls-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 480px;
     margin-top: 10px;
 }
 
-/* Seek Bar with Prev & Next Buttons */
-.seek-bar-container {
+/* Seek bar */
+#seek-bar-container {
     display: flex;
     align-items: center;
-    justify-content: center;
-    width: 300px;
-    gap: 10px; /* Adds space between prev, seek bar, and next */
-}
-#prev-btn, #next-btn {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 20px;
-    cursor: pointer;
-    transition: 0.3s;
-}
-#prev-btn:hover, #next-btn:hover {
-    color: #1db954;
-}
-#seek-bar {
-    width: 200px;
-    height: 5px;
-    background: #444;
-    border-radius: 5px;
-    cursor: pointer;
+    width: 100%;
 }
 
-/* Play/Pause Button (Centered Below Seek Bar) */
-.play-pause-container {
-    display: flex;
-    justify-content: center;
-    margin-top: 5px;
-}
-#play-pause-btn {
+#prev-btn, #next-btn {
     background: none;
     border: none;
     color: white;
     font-size: 24px;
     cursor: pointer;
-    transition: 0.3s;
-}
-#play-pause-btn:hover {
-    color: #1db954;
+    padding: 5px 10px;
 }
 
-/* Authentication (Right) */
-.right-section {
+#seek-bar {
     flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    position: absolute;
-    top: 20px;
-    right: 20px;
-}
-#google-login-button, #google-logout-button {
-    background-color: #1db954;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    margin-bottom: 10px;
-    cursor: pointer;
-    font-size: 14px;
+    appearance: none;
+    height: 5px;
+    background: #444;
     border-radius: 5px;
-    transition: 0.3s;
-}
-#google-login-button:hover, #google-logout-button:hover {
-    background-color: #17a44d;
+    outline: none;
+    cursor: pointer;
 }
 
-/* Search Bar (Left-aligned) */
-.search-container {
-    display: flex;
-    align-items: center;
-    margin: 20px 0;
-    width: 100%;
-}
-#search-input {
-    width: 300px;
-    padding: 10px;
-    border-radius: 20px;
-    border: none;
-    font-size: 16px;
-    background: #333;
-    color: white;
-}
-#search-button {
-    margin-left: 10px;
-    padding: 10px 15px;
-    font-size: 16px;
-    background-color: #1db954;
-    color: white;
-    border: none;
+#seek-bar::-webkit-slider-thumb {
+    appearance: none;
+    width: 12px;
+    height: 12px;
+    background: white;
     border-radius: 50%;
     cursor: pointer;
-    transition: 0.3s;
-}
-#search-button:hover {
-    background-color: #17a44d;
 }
 
-/* Search Results (Left-aligned) */
-#search-results {
-    width: 300px;
-    text-align: left;
+/* Play/Pause button */
+#play-pause-container {
     margin-top: 10px;
 }
-#search-results button {
-    display: block;
-    width: 100%;
-    background-color: #333;
-    color: white;
+
+#play-pause-btn {
+    background: none;
     border: none;
-    padding: 10px;
-    margin: 5px 0;
+    color: white;
+    font-size: 28px;
     cursor: pointer;
-    border-radius: 5px;
-    transition: 0.3s;
 }
-#search-results button:hover {
-    background-color: #444;
+
+/* Search Bar */
+#search-container {
+    margin-top: 20px;
+}
+
+#search-input {
+    padding: 8px;
+    border-radius: 4px;
+    border: none;
+    width: 200px;
+}
+
+#search-button {
+    padding: 8px 12px;
+    margin-left: 5px;
+    border-radius: 4px;
+    border: none;
+    background-color: darkblue;
+    color: white;
+    cursor: pointer;
+}
+
+#search-results {
+    margin-top: 10px;
+}
+
+/* Sign-in buttons */
+#auth-container {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+button {
+    background-color: darkblue;
+    border: none;
+    padding: 8px 12px;
+    color: white;
+    cursor: pointer;
+    border-radius: 4px;
+    margin: 5px;
+}
+
+button:hover {
+    background-color: #1a1aff;
 }
