@@ -10,16 +10,16 @@ body {
     height: 100vh;
 }
 
-/* Top Section: YouTube Player (Left) & Authentication (Right) */
+/* Top Section: YouTube Player & Auth (Left) */
 #top-container {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;  /* Aligns everything to the left */
     align-items: flex-start;
     width: 100%;
     padding: 15px;
 }
 
-/* YouTube Player + Controls (Left Side) */
+/* Left Side: YouTube Player + Controls */
 #left-container {
     display: flex;
     flex-direction: column;
@@ -27,8 +27,9 @@ body {
     width: 400px;
 }
 
-/* Authentication Buttons (Right Side) */
+/* Sign-in/Sign-out Moved to Left */
 #auth-container {
+    margin-top: 10px;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -76,7 +77,7 @@ body {
     background-color: #e03d00;
 }
 
-/* Playback Controls - Now Properly Below YouTube Player */
+/* Playback Controls - Properly Below YouTube Player */
 #controls-container {
     display: flex;
     flex-direction: column;
@@ -111,10 +112,10 @@ body {
     cursor: pointer;
 }
 
-/* Play/Pause Button (Centered Below Seek Bar) */
+/* Play/Pause Button (Now Properly Below Seek Bar, Aligned Left) */
 #play-pause-container {
     margin-top: 10px;
-    align-self: center;
+    align-self: flex-start;  /* Aligns left under the seek bar */
 }
 
 #play-pause-btn {
