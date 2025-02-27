@@ -1,22 +1,31 @@
-/* General styles */
+/* General Page Styling */
 body {
     font-family: Arial, sans-serif;
-    background-color: #000;
+    background-color: #121212;
     color: white;
     margin: 0;
     padding: 0;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    height: 100vh;
+    overflow: hidden;
 }
 
-/* Video player */
+/* Main Layout */
+#main-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 100vh;
+    padding: 20px;
+}
+
+/* Left Section (YouTube Player) */
 #video-container {
+    flex: 2;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    width: 80%;
-    margin-top: 20px;
 }
 
 #video-player {
@@ -25,20 +34,20 @@ body {
     border-radius: 8px;
 }
 
-/* Controls Container */
+/* Middle Section (Controls) */
 #controls-container {
+    flex: 2;
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 480px;
-    margin-top: 10px;
+    justify-content: center;
 }
 
-/* Seek bar */
+/* Seek Bar with Prev & Next */
 #seek-bar-container {
     display: flex;
     align-items: center;
-    width: 100%;
+    width: 300px;
 }
 
 #prev-btn, #next-btn {
@@ -69,7 +78,7 @@ body {
     cursor: pointer;
 }
 
-/* Play/Pause button */
+/* Play/Pause Button Below Seek Bar */
 #play-pause-container {
     margin-top: 10px;
 }
@@ -104,15 +113,12 @@ body {
     cursor: pointer;
 }
 
-#search-results {
-    margin-top: 10px;
-}
-
-/* Sign-in buttons */
+/* Right Section (Authentication) */
 #auth-container {
-    position: absolute;
-    top: 10px;
-    right: 10px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
 }
 
 button {
