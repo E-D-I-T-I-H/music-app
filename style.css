@@ -1,202 +1,144 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Music App</title>
+/* General Page Styles */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #181818;
+    color: white;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
 
-    <!-- Link to External CSS -->
-    <link rel="stylesheet" href="style.css">
+/* --- TOP CONTAINER: YouTube Player + Search + Controls + Auth --- */
+#top-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
+    padding: 15px;
+}
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+/* --- LEFT: YouTube Player & Controls --- */
+#left-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centers everything under the player */
+}
 
-    <!-- YouTube IFrame API -->
-    <script src="https://www.youtube.com/iframe_api"></script>
-</head>
-<body>
-    <!-- Top Container -->
-    <div id="top-container">
-        <!-- Left Side (YouTube Player & Controls) -->
-        <div id="left-container">
-            <div id="player"></div>
+/* YouTube Player */
+#player {
+    width: 400px;
+    height: 225px;
+}
 
-            <!-- Search Bar -->
-            <div id="search-container">
-                <input type="text" id="search-input" placeholder="Search for songs...">
-                <button id="search-button">Search</button>
-            </div>
+/* Search Bar */
+#search-container {
+    margin-top: 10px;
+}
 
-            <!-- Seek Bar & Controls -->
-            <div id="controls-container">
-                <div id="seek-bar-container">
-                    <button id="prev-btn">⏮️</button>
-                    <input type="range" id="seek-bar" min="0" value="0">
-                    <button id="next-btn">⏭️</button>
-                </div>
-                <div id="play-pause-container">
-                    <button id="play-pause-btn">▶️</button>
-                </div>
-            </div>
-        </div>
+#search-input {
+    width: 250px;
+    padding: 8px;
+    border-radius: 5px;
+    border: none;
+}
 
-        <!-- Right Side (Authentication) -->
-        <div id="auth-container">
-            <button id="login-btn">Sign in with Google</button>
-            <button id="logout-btn" style="display: none;">Sign out</button>
-        </div>
-    </div>
+#search-button {
+    padding: 8px 12px;
+    margin-left: 5px;
+    cursor: pointer;
+    background-color: #ff4500;
+    color: white;
+    border: none;
+    border-radius: 5px;
+}
 
-    <!-- Search Results -->
-    <div id="search-results"></div>
+#search-button:hover {
+    background-color: #e03d00;
+}
 
-    <script>
-        // Firebase Configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyBFfY5CZScu8FdE2oLjaCTQ3H5WbAQXos8",
-            authDomain: "your-app.firebaseapp.com",
-            databaseURL: "https://your-app.firebaseio.com",
-            projectId: "your-app",
-            storageBucket: "your-app.appspot.com",
-            messagingSenderId: "your-sender-id",
-            appId: "your-app-id"
-        };
+/* --- SEEK BAR & BUTTONS (CENTERED TO YOUTUBE PLAYER) --- */
+#controls-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centers everything */
+    width: 400px; /* SAME WIDTH AS YOUTUBE PLAYER */
+    margin-top: 15px;
+}
 
-        // Initialize Firebase
-        const app = firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const database = firebase.database();
+/* Seek Bar & Prev/Next Buttons */
+#seek-bar-container {
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Centers the seek bar */
+    width: 100%;
+    gap: 15px;
+}
 
-        // YouTube Player Setup
-        let player;
-        let playlist = []; // Stores searched video IDs
-        let currentIndex = 0;
+/* Seek Bar */
+#seek-bar {
+    flex-grow: 1;
+    height: 5px;
+    background: #555;
+    border-radius: 5px;
+    cursor: pointer;
+}
 
-        function onYouTubeIframeAPIReady() {
-            player = new YT.Player('player', {
-                height: '225',
-                width: '400',
-                events: {
-                    'onStateChange': onPlayerStateChange
-                }
-            });
-        }
+/* Prev/Next Buttons */
+#prev-btn, #next-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+}
 
-        // Play/Pause Button
-        document.getElementById("play-pause-btn").addEventListener("click", () => {
-            const state = player.getPlayerState();
-            if (state === 1) {
-                player.pauseVideo();
-                document.getElementById("play-pause-btn").innerText = "▶️";
-            } else {
-                player.playVideo();
-                document.getElementById("play-pause-btn").innerText = "⏸️";
-            }
-        });
+#prev-btn:hover, #next-btn:hover {
+    opacity: 0.7;
+}
 
-        // Previous Video
-        document.getElementById("prev-btn").addEventListener("click", () => {
-            currentIndex = (currentIndex - 1 + playlist.length) % playlist.length;
-            player.loadVideoById(playlist[currentIndex]);
-            updateFirebase();
-        });
+/* Play/Pause Button (Centered UNDER Seek Bar) */
+#play-pause-container {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-top: 8px;
+}
 
-        // Next Video
-        document.getElementById("next-btn").addEventListener("click", () => {
-            currentIndex = (currentIndex + 1) % playlist.length;
-            player.loadVideoById(playlist[currentIndex]);
-            updateFirebase();
-        });
+#play-pause-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+}
 
-        // Seek Bar Update
-        const seekBar = document.getElementById("seek-bar");
+#play-pause-btn:hover {
+    opacity: 0.7;
+}
 
-        function updateSeekBar() {
-            setInterval(() => {
-                if (player && player.getDuration) {
-                    seekBar.max = player.getDuration();
-                    seekBar.value = player.getCurrentTime();
-                }
-            }, 1000);
-        }
+/* --- RIGHT: Sign In/Sign Out (Moved to Rightmost Side) --- */
+#auth-container {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
 
-        seekBar.addEventListener("input", () => {
-            player.seekTo(seekBar.value);
-            updateFirebase();
-        });
 
-        // Handle Search
-        document.getElementById("search-button").addEventListener("click", () => {
-            const query = document.getElementById("search-input").value;
-            fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${query}&type=video&key=AIzaSyBFfY5CZScu8FdE2oLjaCTQ3H5WbAQXos8`)
-                .then(response => response.json())
-                .then(data => {
-                    const results = document.getElementById("search-results");
-                    results.innerHTML = "";
-                    playlist = [];
-                    data.items.forEach(item => {
-                        const videoId = item.id.videoId;
-                        playlist.push(videoId);
+#login-btn, #logout-btn {
+    background: none;
+    border: 1px solid white;
+    color: white;
+    padding: 6px 12px;
+    cursor: pointer;
+    border-radius: 5px;
+}
 
-                        const button = document.createElement("button");
-                        button.innerText = item.snippet.title;
-                        button.addEventListener("click", () => {
-                            currentIndex = playlist.indexOf(videoId);
-                            player.loadVideoById(videoId);
-                            updateFirebase();
-                        });
-
-                        results.appendChild(button);
-                    });
-                });
-        });
-
-        // Firebase Sync
-        function updateFirebase() {
-            database.ref("music").set({
-                videoId: playlist[currentIndex],
-                seekTime: player.getCurrentTime()
-            });
-        }
-
-        database.ref("music").on("value", (snapshot) => {
-            const data = snapshot.val();
-            if (data) {
-                player.loadVideoById(data.videoId);
-                player.seekTo(data.seekTime);
-            }
-        });
-
-        // Google Sign-In
-        document.getElementById("login-btn").addEventListener("click", () => {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider).then((result) => {
-                document.getElementById("login-btn").style.display = "none";
-                document.getElementById("logout-btn").style.display = "block";
-            });
-        });
-
-        // Google Sign-Out
-        document.getElementById("logout-btn").addEventListener("click", () => {
-            auth.signOut().then(() => {
-                document.getElementById("login-btn").style.display = "block";
-                document.getElementById("logout-btn").style.display = "none";
-            });
-        });
-
-        // Update UI if already logged in
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                document.getElementById("login-btn").style.display = "none";
-                document.getElementById("logout-btn").style.display = "block";
-            } else {
-                document.getElementById("login-btn").style.display = "block";
-                document.getElementById("logout-btn").style.display = "none";
-            }
-        });
-
-    </script>
-</body>
-</html>
+#login-btn:hover, #logout-btn:hover {
+    background-color: white;
+    color: black;
+}
