@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music App</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
+
+    <!-- YouTube IFrame API -->
+    <script src="https://www.youtube.com/iframe_api"></script>
+</head>
+<body>
+    <h1>Welcome to the Music App</h1>
+    <p>Listen to music, search, and play your favorite songs!</p>
+
+    <!-- Google Sign-In/Out -->
+    <button id="google-login-button">Sign in with Google</button>
+    <button id="google-logout-button" style="display: none;">Sign out</button>
+
+    <div id="user-info"></div>
+
+    <!-- Search Bar -->
+    <input type="text" id="search-input" placeholder="Search for songs...">
+    <button id="search-button">Search</button>
+
+    <div id="search-results"></div>
+
+    <!-- Playback Controls -->
+    <div id="playback-controls">
+        <button id="prev-btn">Prev</button>
+        <button id="play-pause-btn">Play/Pause</button>
+        <input type="range" id="seek-bar" min="0" max="100" value="0">
+        <button id="next-btn">Next</button>
+    </div>
+
+    <!-- YouTube Player -->
+    <div id="youtube-player"></div>
+
+    <script>
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyAF8R4iNFv3oAZVOZcw5fWUPz8FScTeBXM",
+            authDomain: "musicapp-3a435.firebaseapp.com",
+            projectId: "musicapp-3a435",
+            storageBucket: "musicapp-3a435.appspot.com",
+            messagingSenderId: "224181252004",
+            appId: "1:224181252004:web:4589e9da0d6400e5fd1b31",
+            measurementId: "G-FY5VPQG5NZ"
+        };
+        firebase.initializeApp(firebaseConfig);
+
+        // Google Authentication
+        document.getElementById('google-login-button').addEventListener('click', () => {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            firebase.auth().signInWithPopup(provider).then(result => {
+                localStorage.setItem('google_user', JSON.stringify(result.user));
+                updateGoogleUI(result.user);
+            }).catch(error => console.error("Google Sign-In Error: ", error));
+        });
+
+        document.getElementById('google-logout-button').addEventListener('click', () => {
+            firebase.auth().signOut().then(() => {
+                localStorage.removeItem('google_user');
+                updateGoogleUI(null);
+            }).catch(error => console.error("Google Sign-Out Error: ", error));
+        });
+
+        function updateGoogleUI(user) {
+            if (user) {
+                document.getElementById('user-info').innerText = `Logged in as: ${user.displayName}`;
+                document.getElementById('google-login-button').style.display = 'none';
+                document.getElementById('google-logout-button').style.display = 'block';
+            } else {
+                document.getElementById('user-info').innerText = '';
+                document.getElementById('google-login-button').style.display = 'block';
+                document.getElementById('google-logout-button').style.display = 'none';
+            }
+        }
+
+        const savedGoogleUser = localStorage.getItem('google_user');
+        if (savedGoogleUser) updateGoogleUI(JSON.parse(savedGoogleUser));
+
+        // YouTube API Player
+        let player;
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('youtube-player', {
+                height: '360',
+                width: '640',
+                playerVars: { 'autoplay': 0, 'controls': 1 },
+                events: {
+                    'onReady': onPlayerReady
+                }
+            });
+        }
+
+        function onPlayerReady(event) {
+            document.getElementById('play-pause-btn').addEventListener('click', () => {
+                if (player.getPlayerState() === 1) {
+                    player.pauseVideo();
+                } else {
+                    player.playVideo();
+                }
+            });
+
+            document.getElementById('seek-bar').addEventListener('input', () => {
+                const seekTo = (player.getDuration() * (document.getElementById('seek-bar').value / 100));
+                player.seekTo(seekTo, true);
+            });
+
+            setInterval(() => {
+                if (player && player.getDuration()) {
+                    document.getElementById('seek-bar').value = (player.getCurrentTime() / player.getDuration()) * 100;
+                }
+            }, 1000);
+        }
+
+        // YouTube Search
+        document.getElementById('search-button').addEventListener('click', () => {
+            const query = document.getElementById('search-input').value;
+            fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${query}&type=video&key=AIzaSyBFfY5CZScu8FdE2oLjaCTQ3H5WbAQXos8`)
+                .then(response => response.json())
+                .then(data => {
+                    const results = document.getElementById('search-results');
+                    results.innerHTML = '';
+                    data.items.forEach(item => {
+                        const button = document.createElement('button');
+                        button.innerText = item.snippet.title;
+                        button.addEventListener('click', () => {
+                            player.loadVideoById(item.id.videoId);
+                        });
+                        results.appendChild(button);
+                    });
+                })
+                .catch(error => console.error("YouTube Search Error: ", error));
+        });
+
+        // Track search history
+        let searchHistory = [];
+        document.getElementById('search-button').addEventListener('click', () => {
+            const query = document.getElementById('search-input').value;
+            if (query && !searchHistory.includes(query)) {
+                searchHistory.push(query);
+                console.log("Search History:", searchHistory);
+            }
+        });
+
+    </script>
+</body>
+</html>
