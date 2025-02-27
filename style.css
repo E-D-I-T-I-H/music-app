@@ -1,106 +1,64 @@
 /* General Styles */
 body {
-    font-family: Arial, sans-serif;
-    background-color: #121212;
+    font-family: 'Arial', sans-serif;
+    background-color: #000; /* Black background */
     color: #fff;
     text-align: center;
-    padding: 20px;
     margin: 0;
+    padding: 0;
 }
 
+/* Heading */
 h1 {
-    font-size: 2.5rem;
-    color: #1DB954;
-}
-
-p {
-    font-size: 1.2rem;
-    color: #bbb;
+    font-size: 2rem;
+    margin-top: 20px;
 }
 
 /* Buttons */
 button {
-    background-color: #1DB954;
+    background-color: #0a74da; /* Dark blue */
+    color: white;
     border: none;
-    color: #fff;
     padding: 10px 20px;
-    font-size: 1rem;
-    cursor: pointer;
-    border-radius: 5px;
     margin: 10px;
-    transition: background-color 0.3s ease;
+    font-size: 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
 }
 
 button:hover {
-    background-color: #1aa34a;
+    background-color: #0959a0; /* Slightly darker blue */
 }
 
-#google-login-button {
-    background-color: #4285F4;
-}
-
-#google-login-button:hover {
-    background-color: #357ae8;
-}
-
-#login-button {
-    background-color: #1DB954;
-}
-
-#login-button:hover {
-    background-color: #1aa34a;
-}
-
-/* User Info */
-#user-info {
-    margin-top: 20px;
-    font-size: 1.2rem;
-}
-
-/* Search Bar */
-#search-input {
-    width: 70%;
+/* Input Field */
+input {
+    width: 80%;
+    max-width: 400px;
     padding: 10px;
+    margin: 10px;
     font-size: 1rem;
-    margin-top: 20px;
-    border: none;
+    border: 1px solid #0a74da;
     border-radius: 5px;
-    background-color: #333;
-    color: #fff;
-}
-
-#search-button {
-    padding: 10px 20px;
-    background-color: #1DB954;
+    background-color: #222;
     color: white;
-    border: none;
-    border-radius: 5px;
-    font-size: 1rem;
-    margin-left: 10px;
-    cursor: pointer;
-}
-
-#search-button:hover {
-    background-color: #1aa34a;
 }
 
 /* Search Results */
 #search-results {
     margin-top: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
 }
 
 .song-item {
     display: flex;
     align-items: center;
-    background-color: #333;
-    padding: 10px;
-    border-radius: 5px;
-    margin: 10px;
-    width: 80%;
     justify-content: space-between;
+    background-color: #111;
+    padding: 10px;
+    margin: 10px auto;
+    border-radius: 5px;
+    width: 80%;
+    max-width: 500px;
 }
 
 .song-item img {
@@ -110,49 +68,26 @@ button:hover {
 .song-item span {
     flex-grow: 1;
     margin-left: 10px;
-    color: #fff;
-    font-size: 1rem;
-}
-
-.song-item button {
-    background-color: #1DB954;
-    padding: 8px 15px;
-    font-size: 0.9rem;
-    cursor: pointer;
-    border-radius: 5px;
-    color: white;
-}
-
-.song-item button:hover {
-    background-color: #1aa34a;
 }
 
 /* Playback Controls */
 #playback-controls {
-    margin-top: 30px;
+    margin-top: 20px;
 }
 
 #playback-controls button {
-    background-color: #1DB954;
-    padding: 15px;
-    margin: 0 10px;
-    font-size: 1.2rem;
-    cursor: pointer;
-    border-radius: 50%;
-    color: white;
+    width: 80px;
+    font-size: 1.1rem;
 }
 
-#playback-controls button:hover {
-    background-color: #1aa34a;
-}
-
-/* Embed Spotify Player */
+/* Spotify Player Container */
 #spotify-player-container {
-    margin-top: 30px;
-    height: 80px;
-    background-color: #1DB954;
-    border-radius: 5px;
-    width: 90%;
+    margin-top: 20px;
+    padding: 20px;
+    background-color: #111;
+    border-radius: 10px;
+    width: 80%;
+    max-width: 600px;
     margin-left: auto;
     margin-right: auto;
 }
