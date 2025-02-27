@@ -11,7 +11,7 @@
     <!-- Spotify Web Playback SDK -->
     <script src="https://sdk.scdn.co/spotify-player.js"></script>
 
-    <!-- Firebase SDK (CDN links) -->
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
 </head>
@@ -145,20 +145,40 @@
                 player.connect().then(success => {
                     if (success) console.log('Spotify player connected');
                 });
+
+                // Player State Updates
+                player.addListener('player_state_changed', state => {
+                    if (!state) return;
+                    document.getElementById('play-pause-btn').innerText = state.paused ? "Play" : "Pause";
+                });
+
+                document.getElementById('play-pause-btn').addEventListener('click', () => {
+                    player.togglePlay();
+                });
+
+                document.getElementById('prev-btn').addEventListener('click', () => {
+                    player.previousTrack();
+                });
+
+                document.getElementById('next-btn').addEventListener('click', () => {
+                    player.nextTrack();
+                });
+
+                // Seek Bar
+                const seekBar = document.getElementById('seek-bar');
+                setInterval(async () => {
+                    const state = await player.getCurrentState();
+                    if (state && state.track_window.current_track) {
+                        seekBar.value = (state.position / state.duration) * 100;
+                    }
+                }, 1000);
+
+                seekBar.addEventListener('input', () => {
+                    const seekPosition = (seekBar.value / 100) * player.duration;
+                    player.seek(seekPosition);
+                });
             };
         }
-
-        document.getElementById('play-pause-btn').addEventListener('click', () => {
-            if (player) player.togglePlay();
-        });
-
-        document.getElementById('prev-btn').addEventListener('click', () => {
-            if (player) player.previousTrack();
-        });
-
-        document.getElementById('next-btn').addEventListener('click', () => {
-            if (player) player.nextTrack();
-        });
 
         getAccessToken();
     </script>
