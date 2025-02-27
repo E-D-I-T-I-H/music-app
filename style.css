@@ -19,15 +19,15 @@ body {
     padding: 15px;
 }
 
-/* YouTube Player (Left) */
-#video-container {
+/* YouTube Player + Controls (Left Side) */
+#left-container {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     width: 400px;
 }
 
-/* Authentication Buttons (Right) */
+/* Authentication Buttons (Right Side) */
 #auth-container {
     display: flex;
     align-items: center;
@@ -52,6 +52,7 @@ body {
 #search-container {
     margin-top: 10px;
     display: flex;
+    width: 100%;
 }
 
 #search-input {
@@ -75,11 +76,11 @@ body {
     background-color: #e03d00;
 }
 
-/* Playback Controls (Below Search) */
+/* Playback Controls - Now Properly Below YouTube Player */
 #controls-container {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start; /* Aligns everything to the left */
     margin-top: 15px;
 }
 
@@ -113,6 +114,7 @@ body {
 /* Play/Pause Button (Centered Below Seek Bar) */
 #play-pause-container {
     margin-top: 10px;
+    align-self: center;
 }
 
 #play-pause-btn {
