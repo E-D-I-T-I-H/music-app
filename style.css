@@ -6,37 +6,56 @@ body {
     margin: 0;
     padding: 0;
     display: flex;
-    justify-content: flex-start;
-    align-items: flex-start;
+    flex-direction: column;
     height: 100vh;
 }
 
-/* Main Layout */
-#main-container {
+/* Top Section: YouTube Player (Left) & Authentication (Right) */
+#top-container {
     display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
     width: 100%;
-    padding: 20px;
+    padding: 15px;
 }
 
-/* Left Section: YouTube Player */
+/* YouTube Player (Left) */
 #video-container {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     width: 400px;
-    position: absolute;
-    top: 10px;
-    left: 10px;
+}
+
+/* Authentication Buttons (Right) */
+#auth-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#login-btn, #logout-btn {
+    background: none;
+    border: 1px solid white;
+    color: white;
+    padding: 6px 12px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+#login-btn:hover, #logout-btn:hover {
+    background-color: white;
+    color: black;
 }
 
 /* Search Bar */
 #search-container {
-    width: 100%;
     margin-top: 10px;
+    display: flex;
 }
 
 #search-input {
-    width: 300px;
+    width: 250px;
     padding: 8px;
     border-radius: 5px;
     border: none;
@@ -56,12 +75,19 @@ body {
     background-color: #e03d00;
 }
 
+/* Playback Controls (Below Search) */
+#controls-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 15px;
+}
+
 /* Seek Bar & Buttons */
 #seek-bar-container {
     display: flex;
     align-items: center;
-    justify-content: center;
-    margin-top: 15px;
+    gap: 15px;
 }
 
 #prev-btn, #next-btn {
@@ -70,7 +96,6 @@ body {
     color: white;
     font-size: 18px;
     cursor: pointer;
-    margin: 0 10px;
 }
 
 #prev-btn:hover, #next-btn:hover {
@@ -85,10 +110,8 @@ body {
     cursor: pointer;
 }
 
-/* Play/Pause Button */
+/* Play/Pause Button (Centered Below Seek Bar) */
 #play-pause-container {
-    display: flex;
-    justify-content: center;
     margin-top: 10px;
 }
 
@@ -102,25 +125,4 @@ body {
 
 #play-pause-btn:hover {
     opacity: 0.7;
-}
-
-/* Right Section: Authentication */
-#auth-container {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-}
-
-#login-btn, #logout-btn {
-    background: none;
-    border: 1px solid white;
-    color: white;
-    padding: 5px 10px;
-    cursor: pointer;
-    border-radius: 5px;
-}
-
-#login-btn:hover, #logout-btn:hover {
-    background-color: white;
-    color: black;
 }
