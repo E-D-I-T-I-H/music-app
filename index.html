@@ -5,15 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Music App</title>
 
-    <!-- Link to external style.css file -->
     <link rel="stylesheet" href="style.css">
-
-    <!-- Spotify Web Playback SDK -->
-    <script src="https://sdk.scdn.co/spotify-player.js"></script>
 
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
+
+    <!-- YouTube IFrame API -->
+    <script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body>
     <h1>Welcome to the Music App</h1>
@@ -23,33 +22,27 @@
     <button id="google-login-button">Sign in with Google</button>
     <button id="google-logout-button" style="display: none;">Sign out</button>
 
-    <!-- Spotify Sign-In/Out -->
-    <button id="spotify-login-button">Login with Spotify</button>
-    <button id="spotify-logout-button" style="display: none;">Logout</button>
-
-    <!-- User Info -->
     <div id="user-info"></div>
 
     <!-- Search Bar -->
     <input type="text" id="search-input" placeholder="Search for songs...">
     <button id="search-button">Search</button>
 
-    <!-- Search Results -->
     <div id="search-results"></div>
 
     <!-- Playback Controls -->
     <div id="playback-controls">
         <button id="prev-btn">Prev</button>
-        <button id="play-pause-btn">Play</button>
+        <button id="play-pause-btn">Play/Pause</button>
         <input type="range" id="seek-bar" min="0" max="100" value="0">
         <button id="next-btn">Next</button>
     </div>
 
-    <!-- Embed Spotify Player -->
-    <div id="spotify-player-container"></div>
+    <!-- YouTube Player -->
+    <div id="youtube-player"></div>
 
     <script>
-        // Firebase Configuration
+        // Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyAF8R4iNFv3oAZVOZcw5fWUPz8FScTeBXM",
             authDomain: "musicapp-3a435.firebaseapp.com",
@@ -59,30 +52,17 @@
             appId: "1:224181252004:web:4589e9da0d6400e5fd1b31",
             measurementId: "G-FY5VPQG5NZ"
         };
-
-        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
 
-        // Spotify API setup
-        const clientId = '51396bbc121f4f19b0a3ac2ab8ff249f';
-        const redirectUri = window.location.origin + '/music-app';
-        const authEndpoint = 'https://accounts.spotify.com/authorize';
-        const scopes = 'user-library-read user-read-playback-state user-modify-playback-state playlist-read-private playlist-read-collaborative';
-
-        let accessToken = localStorage.getItem('spotify_token');
-        let player;
-
-        // Google Login
+        // Google Authentication
         document.getElementById('google-login-button').addEventListener('click', () => {
             const provider = new firebase.auth.GoogleAuthProvider();
             firebase.auth().signInWithPopup(provider).then(result => {
-                const user = result.user;
-                localStorage.setItem('google_user', JSON.stringify(user));
-                updateGoogleUI(user);
+                localStorage.setItem('google_user', JSON.stringify(result.user));
+                updateGoogleUI(result.user);
             }).catch(error => console.error("Google Sign-In Error: ", error));
         });
 
-        // Google Logout
         document.getElementById('google-logout-button').addEventListener('click', () => {
             firebase.auth().signOut().then(() => {
                 localStorage.removeItem('google_user');
@@ -105,82 +85,60 @@
         const savedGoogleUser = localStorage.getItem('google_user');
         if (savedGoogleUser) updateGoogleUI(JSON.parse(savedGoogleUser));
 
-        // Spotify Login
-        document.getElementById('spotify-login-button').addEventListener('click', () => {
-            window.location.href = `${authEndpoint}?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scopes}&response_type=token&show_dialog=true`;
+        // YouTube API Player
+        let player;
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('youtube-player', {
+                height: '360',
+                width: '640',
+                videoId: '',
+                playerVars: { 'autoplay': 0, 'controls': 1 },
+                events: {
+                    'onReady': onPlayerReady
+                }
+            });
+        }
+
+        function onPlayerReady(event) {
+            document.getElementById('play-pause-btn').addEventListener('click', () => {
+                if (player.getPlayerState() === 1) {
+                    player.pauseVideo();
+                } else {
+                    player.playVideo();
+                }
+            });
+
+            document.getElementById('seek-bar').addEventListener('input', () => {
+                const seekTo = (player.getDuration() * (document.getElementById('seek-bar').value / 100));
+                player.seekTo(seekTo, true);
+            });
+
+            setInterval(() => {
+                if (player && player.getDuration()) {
+                    document.getElementById('seek-bar').value = (player.getCurrentTime() / player.getDuration()) * 100;
+                }
+            }, 1000);
+        }
+
+        // YouTube Search
+        document.getElementById('search-button').addEventListener('click', () => {
+            const query = document.getElementById('search-input').value;
+            fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${query}&type=video&key=AIzaSyBFfY5CZScu8FdE2oLjaCTQ3H5WbAQXos8`)
+                .then(response => response.json())
+                .then(data => {
+                    const results = document.getElementById('search-results');
+                    results.innerHTML = '';
+                    data.items.forEach(item => {
+                        const button = document.createElement('button');
+                        button.innerText = item.snippet.title;
+                        button.addEventListener('click', () => {
+                            player.loadVideoById(item.id.videoId);
+                        });
+                        results.appendChild(button);
+                    });
+                })
+                .catch(error => console.error("YouTube Search Error: ", error));
         });
-
-        // Spotify Logout
-        document.getElementById('spotify-logout-button').addEventListener('click', () => {
-            localStorage.removeItem('spotify_token');
-            updateSpotifyUI(null);
-        });
-
-        function getAccessToken() {
-            const urlParams = new URLSearchParams(window.location.hash.substring(1));
-            const token = urlParams.get('access_token');
-            if (token) {
-                localStorage.setItem('spotify_token', token);
-                accessToken = token;
-                window.history.replaceState({}, document.title, window.location.pathname);
-                updateSpotifyUI(token);
-            } else if (accessToken) updateSpotifyUI(accessToken);
-        }
-
-        function updateSpotifyUI(token) {
-            document.getElementById('spotify-login-button').style.display = token ? 'none' : 'block';
-            document.getElementById('spotify-logout-button').style.display = token ? 'block' : 'none';
-            document.getElementById('user-info').innerText = token ? 'Logged into Spotify!' : '';
-            if (token) initializeSpotifyPlayer();
-        }
-
-        function initializeSpotifyPlayer() {
-            if (!accessToken) return;
-            window.onSpotifyWebPlaybackSDKReady = () => {
-                player = new Spotify.Player({
-                    name: 'Music App Player',
-                    getOAuthToken: cb => cb(accessToken),
-                    volume: 0.5
-                });
-                player.connect().then(success => {
-                    if (success) console.log('Spotify player connected');
-                });
-
-                // Player State Updates
-                player.addListener('player_state_changed', state => {
-                    if (!state) return;
-                    document.getElementById('play-pause-btn').innerText = state.paused ? "Play" : "Pause";
-                });
-
-                document.getElementById('play-pause-btn').addEventListener('click', () => {
-                    player.togglePlay();
-                });
-
-                document.getElementById('prev-btn').addEventListener('click', () => {
-                    player.previousTrack();
-                });
-
-                document.getElementById('next-btn').addEventListener('click', () => {
-                    player.nextTrack();
-                });
-
-                // Seek Bar
-                const seekBar = document.getElementById('seek-bar');
-                setInterval(async () => {
-                    const state = await player.getCurrentState();
-                    if (state && state.track_window.current_track) {
-                        seekBar.value = (state.position / state.duration) * 100;
-                    }
-                }, 1000);
-
-                seekBar.addEventListener('input', () => {
-                    const seekPosition = (seekBar.value / 100) * player.duration;
-                    player.seek(seekPosition);
-                });
-            };
-        }
-
-        getAccessToken();
     </script>
 </body>
 </html>
