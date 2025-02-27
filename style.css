@@ -1,136 +1,116 @@
-/* General Page Styling */
+/* General Styles */
 body {
     font-family: Arial, sans-serif;
-    background-color: #121212;
+    background-color: #181818;
     color: white;
     margin: 0;
     padding: 0;
     display: flex;
-    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
     height: 100vh;
-    overflow: hidden;
 }
 
 /* Main Layout */
 #main-container {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    height: 100vh;
+    flex-direction: row;
+    width: 100%;
     padding: 20px;
 }
 
-/* Left Section (YouTube Player) */
+/* Left Section: Video */
 #video-container {
-    flex: 2;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+    flex: 1;
+    max-width: 500px;
 }
 
-#video-player {
-    width: 480px;
-    height: 270px;
-    border-radius: 8px;
-}
-
-/* Middle Section (Controls) */
+/* Center Section: Controls */
 #controls-container {
     flex: 2;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    align-items: flex-start;
+    margin-left: 20px;
 }
 
-/* Seek Bar with Prev & Next */
+/* Seek Bar with Prev/Next */
 #seek-bar-container {
     display: flex;
     align-items: center;
-    width: 300px;
-}
-
-#prev-btn, #next-btn {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 24px;
-    cursor: pointer;
-    padding: 5px 10px;
+    width: 100%;
 }
 
 #seek-bar {
-    flex: 1;
-    appearance: none;
-    height: 5px;
-    background: #444;
-    border-radius: 5px;
-    outline: none;
-    cursor: pointer;
+    flex-grow: 1;
+    margin: 0 10px;
 }
 
-#seek-bar::-webkit-slider-thumb {
-    appearance: none;
-    width: 12px;
-    height: 12px;
-    background: white;
-    border-radius: 50%;
-    cursor: pointer;
-}
-
-/* Play/Pause Button Below Seek Bar */
-#play-pause-container {
-    margin-top: 10px;
-}
-
-#play-pause-btn {
+#prev-btn, #next-btn, #play-pause-btn {
     background: none;
     border: none;
     color: white;
-    font-size: 28px;
+    font-size: 20px;
     cursor: pointer;
 }
 
-/* Search Bar */
+#prev-btn:hover, #next-btn:hover, #play-pause-btn:hover {
+    opacity: 0.7;
+}
+
+/* Play/Pause Button */
+#play-pause-container {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-top: 10px;
+}
+
+/* Search Box */
 #search-container {
     margin-top: 20px;
+    display: flex;
 }
 
 #search-input {
-    padding: 8px;
-    border-radius: 4px;
-    border: none;
     width: 200px;
+    padding: 5px;
+    border-radius: 5px;
+    border: none;
 }
 
 #search-button {
-    padding: 8px 12px;
+    padding: 5px 10px;
     margin-left: 5px;
-    border-radius: 4px;
-    border: none;
-    background-color: darkblue;
-    color: white;
     cursor: pointer;
+    background-color: #ff4500;
+    color: white;
+    border: none;
+    border-radius: 5px;
 }
 
-/* Right Section (Authentication) */
+#search-button:hover {
+    background-color: #e03d00;
+}
+
+/* Right Section: Authentication */
 #auth-container {
-    flex: 1;
     display: flex;
     flex-direction: column;
     align-items: flex-end;
+    margin-left: auto;
 }
 
-button {
-    background-color: darkblue;
-    border: none;
-    padding: 8px 12px;
+#login-btn, #logout-btn {
+    background: none;
+    border: 1px solid white;
     color: white;
+    padding: 5px 10px;
     cursor: pointer;
-    border-radius: 4px;
-    margin: 5px;
+    border-radius: 5px;
 }
 
-button:hover {
-    background-color: #1a1aff;
+#login-btn:hover, #logout-btn:hover {
+    background-color: white;
+    color: black;
 }
