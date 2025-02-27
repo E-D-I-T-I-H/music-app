@@ -19,20 +19,22 @@
     <h1>Welcome to the Music App</h1>
     <p>Listen to music, search, and play your favorite songs!</p>
 
-    <!-- Google Sign-In Button -->
+    <!-- Google Sign-In/Out -->
     <button id="google-login-button">Sign in with Google</button>
+    <button id="google-logout-button" style="display: none;">Sign out</button>
 
-    <!-- Spotify Login Button -->
-    <button id="login-button">Login with Spotify</button>
+    <!-- Spotify Sign-In/Out -->
+    <button id="spotify-login-button">Login with Spotify</button>
+    <button id="spotify-logout-button" style="display: none;">Logout</button>
 
-    <!-- User Info (after login) -->
+    <!-- User Info -->
     <div id="user-info"></div>
 
     <!-- Search Bar -->
     <input type="text" id="search-input" placeholder="Search for songs...">
     <button id="search-button">Search</button>
 
-    <!-- Search Results (songs) -->
+    <!-- Search Results -->
     <div id="search-results"></div>
 
     <!-- Playback Controls -->
@@ -42,11 +44,11 @@
         <button id="next-btn">Next</button>
     </div>
 
-    <!-- Embed Spotify Player (if logged in) -->
+    <!-- Embed Spotify Player -->
     <div id="spotify-player-container"></div>
 
     <script>
-        // Firebase configuration for Google login
+        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyAF8R4iNFv3oAZVOZcw5fWUPz8FScTeBXM",
             authDomain: "musicapp-3a435.firebaseapp.com",
@@ -61,74 +63,93 @@
         firebase.initializeApp(firebaseConfig);
 
         // Spotify API setup
-        const clientId = '51396bbc121f4f19b0a3ac2ab8ff249f'; // Replace with your actual Spotify client ID
-        const redirectUri = window.location.origin + '/music-app'; // Direct to /music-app
+        const clientId = '51396bbc121f4f19b0a3ac2ab8ff249f'; // Your Spotify client ID
+        const redirectUri = window.location.origin + '/music-app';
         const authEndpoint = 'https://accounts.spotify.com/authorize';
         const scopes = 'user-library-read user-read-playback-state user-modify-playback-state playlist-read-private playlist-read-collaborative';
 
-        let accessToken = '';
+        let accessToken = localStorage.getItem('spotify_token');
         let player;
 
-        // Check if the user is authenticated
-       function getAccessToken() {
-    const hashParams = new URLSearchParams(window.location.hash.substring(1));
-    const token = hashParams.get('access_token');
-
-    if (token) {
-        accessToken = token;
-        window.history.replaceState({}, document.title, window.location.pathname); // Clean URL
-
-        document.getElementById('user-info').innerText = 'Logged in!';
-        document.getElementById('login-button').style.display = 'none';
-        
-        // Store token in localStorage so it persists after page reload
-        localStorage.setItem('spotify_access_token', token);
-
-        initializeSpotifyPlayer();
-    } else {
-        // If no token in URL, check localStorage (user might have refreshed the page)
-        const storedToken = localStorage.getItem('spotify_access_token');
-        if (storedToken) {
-            accessToken = storedToken;
-            document.getElementById('user-info').innerText = 'Logged in!';
-            document.getElementById('login-button').style.display = 'none';
-            initializeSpotifyPlayer();
-        }
-    }
-}
-
-        
         // Handle Login with Google
-document.getElementById('google-login-button').addEventListener('click', () => {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    firebase.auth().signInWithPopup(provider).then((result) => {
-        const user = result.user;
-        updateUI(user);
-    }).catch((error) => {
-        console.error("Error signing in with Google: ", error);
-    });
-});
+        document.getElementById('google-login-button').addEventListener('click', () => {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            firebase.auth().signInWithPopup(provider).then((result) => {
+                const user = result.user;
+                localStorage.setItem('google_user', JSON.stringify(user));
+                updateGoogleUI(user);
+            }).catch((error) => {
+                console.error("Google Sign-In Error: ", error);
+            });
+        });
 
-// Listen for authentication state changes
-firebase.auth().onAuthStateChanged((user) => {
-    if (user) {
-        updateUI(user); // User is signed in
-    } else {
-        console.log("No user logged in");
-    }
-});
+        // Handle Logout with Google
+        document.getElementById('google-logout-button').addEventListener('click', () => {
+            firebase.auth().signOut().then(() => {
+                localStorage.removeItem('google_user');
+                updateGoogleUI(null);
+            }).catch((error) => {
+                console.error("Google Sign-Out Error: ", error);
+            });
+        });
 
-// Function to update UI when user is logged in
-function updateUI(user) {
-    document.getElementById('user-info').innerText = `Logged in as: ${user.displayName}`;
-    document.getElementById('google-login-button').style.display = 'none';
-}
+        // Update Google UI
+        function updateGoogleUI(user) {
+            if (user) {
+                document.getElementById('user-info').innerText = `Logged in as: ${user.displayName}`;
+                document.getElementById('google-login-button').style.display = 'none';
+                document.getElementById('google-logout-button').style.display = 'block';
+            } else {
+                document.getElementById('user-info').innerText = '';
+                document.getElementById('google-login-button').style.display = 'block';
+                document.getElementById('google-logout-button').style.display = 'none';
+            }
+        }
 
+        // Check Google Login State on Page Load
+        const savedGoogleUser = localStorage.getItem('google_user');
+        if (savedGoogleUser) {
+            updateGoogleUI(JSON.parse(savedGoogleUser));
+        }
 
         // Handle Login with Spotify
-        document.getElementById('login-button').addEventListener('click', () => {
+        document.getElementById('spotify-login-button').addEventListener('click', () => {
             window.location.href = `${authEndpoint}?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scopes}&response_type=token&show_dialog=true`;
         });
+
+        // Handle Logout with Spotify
+        document.getElementById('spotify-logout-button').addEventListener('click', () => {
+            localStorage.removeItem('spotify_token');
+            updateSpotifyUI(null);
+        });
+
+        // Check Spotify Token in URL
+        function getAccessToken() {
+            const urlParams = new URLSearchParams(window.location.hash.substring(1));
+            const token = urlParams.get('access_token');
+            if (token) {
+                localStorage.setItem('spotify_token', token);
+                accessToken = token;
+                window.history.replaceState({}, document.title, window.location.pathname);
+                updateSpotifyUI(token);
+            } else if (accessToken) {
+                updateSpotifyUI(accessToken);
+            }
+        }
+
+        // Update Spotify UI
+        function updateSpotifyUI(token) {
+            if (token) {
+                document.getElementById('spotify-login-button').style.display = 'none';
+                document.getElementById('spotify-logout-button').style.display = 'block';
+                document.getElementById('user-info').innerText = 'Logged into Spotify!';
+                initializeSpotifyPlayer();
+            } else {
+                document.getElementById('spotify-login-button').style.display = 'block';
+                document.getElementById('spotify-logout-button').style.display = 'none';
+                document.getElementById('user-info').innerText = '';
+            }
+        }
 
         // Initialize the Spotify Web Playback SDK
         function initializeSpotifyPlayer() {
@@ -147,74 +168,22 @@ function updateUI(user) {
                     }
                 });
 
-                // Handle play/pause button
+                // Handle playback controls
                 document.getElementById('play-pause-btn').addEventListener('click', () => {
                     player.togglePlay();
                 });
 
-                // Handle next button
                 document.getElementById('next-btn').addEventListener('click', () => {
                     player.nextTrack();
                 });
 
-                // Handle previous button
                 document.getElementById('prev-btn').addEventListener('click', () => {
                     player.previousTrack();
                 });
             };
         }
 
-        // Search for songs on Spotify
-        function searchSongs(query) {
-            fetch(`https://api.spotify.com/v1/search?q=${query}&type=track`, {
-                headers: {
-                    'Authorization': `Bearer ${accessToken}`
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                const results = data.tracks.items;
-                const resultsContainer = document.getElementById('search-results');
-                resultsContainer.innerHTML = '';
-                results.forEach(song => {
-                    const songElement = document.createElement('div');
-                    songElement.classList.add('song-item');
-                    songElement.innerHTML = `
-                        <div>
-                            <img src="${song.album.images[0].url}" alt="${song.name}" width="50">
-                            <span>${song.name} - ${song.artists[0].name}</span>
-                        </div>
-                        <button class="play-song" data-uri="${song.uri}">Play</button>
-                    `;
-                    resultsContainer.appendChild(songElement);
-                });
-
-                // Add event listeners for play buttons in the search results
-                const playButtons = document.querySelectorAll('.play-song');
-                playButtons.forEach(button => {
-                    button.addEventListener('click', (e) => {
-                        const songUri = e.target.getAttribute('data-uri');
-                        playSong(songUri);
-                    });
-                });
-            });
-        }
-
-        // Play selected song
-        function playSong(uri) {
-            player.play({ uris: [uri] });
-            document.getElementById('play-pause-btn').innerText = 'Pause';
-        }
-
-        // Handle search button click
-        document.getElementById('search-button').addEventListener('click', () => {
-            const query = document.getElementById('search-input').value;
-            if (query) {
-                searchSongs(query);
-            }
-        });
-
-        // Check if the access token exists on page load
+        // Check for Spotify Token on Page Load
         getAccessToken();
     </script>
 </body>
