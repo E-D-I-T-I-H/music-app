@@ -7,16 +7,16 @@ body {
     padding: 0;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
+    padding: 20px;
 }
 
 /* Main Layout */
 .container {
     display: flex;
-    width: 90%;
+    width: 100%;
     max-width: 1200px;
-    margin-top: 20px;
-    justify-content: space-between;
+    justify-content: flex-start;
 }
 
 /* Video Player (Left) */
@@ -28,7 +28,7 @@ body {
     align-items: flex-start;
 }
 #youtube-player {
-    width: 100%;
+    width: 640px;
     height: 360px;
     background: #000;
     border-radius: 10px;
@@ -67,6 +67,9 @@ body {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
+    position: absolute;
+    top: 20px;
+    right: 20px;
 }
 #google-login-button, #google-logout-button {
     background-color: #1db954;
@@ -83,20 +86,19 @@ body {
     background-color: #17a44d;
 }
 
-/* Search Bar */
+/* Search Bar (Left-aligned) */
 .search-container {
     display: flex;
-    justify-content: center;
+    align-items: center;
     margin: 20px 0;
-    width: 90%;
+    width: 100%;
 }
 #search-input {
-    width: 40%;
+    width: 300px;
     padding: 10px;
     border-radius: 20px;
     border: none;
     font-size: 16px;
-    text-align: center;
     background: #333;
     color: white;
 }
@@ -115,11 +117,10 @@ body {
     background-color: #17a44d;
 }
 
-/* Search Results */
+/* Search Results (Left-aligned) */
 #search-results {
-    width: 90%;
-    max-width: 600px;
-    text-align: center;
+    width: 300px;
+    text-align: left;
     margin-top: 10px;
 }
 #search-results button {
