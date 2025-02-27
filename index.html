@@ -102,7 +102,6 @@
             }
         }
 
-        // Check Google Login on Page Load
         const savedGoogleUser = localStorage.getItem('google_user');
         if (savedGoogleUser) updateGoogleUI(JSON.parse(savedGoogleUser));
 
@@ -143,14 +142,22 @@
                     getOAuthToken: cb => cb(accessToken),
                     volume: 0.5
                 });
-                player.connect();
+                player.connect().then(success => {
+                    if (success) console.log('Spotify player connected');
+                });
             };
         }
 
-        // Update seek bar
-        document.getElementById('seek-bar').addEventListener('input', (e) => {
-            const seekTo = e.target.value;
-            if (player) player.seek(seekTo * 1000);
+        document.getElementById('play-pause-btn').addEventListener('click', () => {
+            if (player) player.togglePlay();
+        });
+
+        document.getElementById('prev-btn').addEventListener('click', () => {
+            if (player) player.previousTrack();
+        });
+
+        document.getElementById('next-btn').addEventListener('click', () => {
+            if (player) player.nextTrack();
         });
 
         getAccessToken();
