@@ -1,144 +1,136 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Music App</title>
+/* General Page Styling */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #121212;
+    color: white;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+}
 
-    <!-- Link to external style.css file -->
-    <link rel="stylesheet" href="style.css">
+/* Main Layout */
+#main-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 100vh;
+    padding: 20px;
+}
 
-    <!-- Firebase SDK (CDN links) -->
-    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
+/* Left Section (YouTube Player) */
+#video-container {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
 
-    <!-- YouTube IFrame API -->
-    <script src="https://www.youtube.com/iframe_api"></script>
-</head>
-<body>
-    <div class="container">
-        <!-- Left Section: Video Player -->
-        <div class="left-section">
-            <div id="youtube-player"></div>
-        </div>
+#video-player {
+    width: 480px;
+    height: 270px;
+    border-radius: 8px;
+}
 
-        <!-- Right Section: Authentication -->
-        <div class="right-section">
-            <button id="google-login-button">Sign in with Google</button>
-            <button id="google-logout-button" style="display: none;">Sign out</button>
-            <div id="user-info"></div>
-        </div>
-    </div>
+/* Middle Section (Controls) */
+#controls-container {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
 
-    <!-- Search Bar -->
-    <div class="search-container">
-        <input type="text" id="search-input" placeholder="Search for songs...">
-        <button id="search-button">🔍</button>
-    </div>
+/* Seek Bar with Prev & Next */
+#seek-bar-container {
+    display: flex;
+    align-items: center;
+    width: 300px;
+}
 
-    <!-- Search Results -->
-    <div id="search-results"></div>
+#prev-btn, #next-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 5px 10px;
+}
 
-    <!-- Bottom Controls -->
-    <div class="bottom-controls">
-        <button id="prev-btn">⏮️</button>
-        <button id="play-pause-btn">▶️</button>
-        <input type="range" id="seek-bar" min="0" max="100" value="0">
-        <button id="next-btn">⏭️</button>
-    </div>
+#seek-bar {
+    flex: 1;
+    appearance: none;
+    height: 5px;
+    background: #444;
+    border-radius: 5px;
+    outline: none;
+    cursor: pointer;
+}
 
-    <script>
-        // Firebase Configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyBFfY5CZScu8FdE2oLjaCTQ3H5WbAQXos8",
-            authDomain: "musicapp-3a435.firebaseapp.com",
-            projectId: "musicapp-3a435",
-            storageBucket: "musicapp-3a435.appspot.com",
-            messagingSenderId: "224181252004",
-            appId: "1:224181252004:web:4589e9da0d6400e5fd1b31",
-            measurementId: "G-FY5VPQG5NZ"
-        };
+#seek-bar::-webkit-slider-thumb {
+    appearance: none;
+    width: 12px;
+    height: 12px;
+    background: white;
+    border-radius: 50%;
+    cursor: pointer;
+}
 
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
+/* Play/Pause Button Below Seek Bar */
+#play-pause-container {
+    margin-top: 10px;
+}
 
-        // Google Login
-        document.getElementById('google-login-button').addEventListener('click', () => {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            firebase.auth().signInWithPopup(provider).then(result => {
-                const user = result.user;
-                localStorage.setItem('google_user', JSON.stringify(user));
-                updateGoogleUI(user);
-            }).catch(error => console.error("Google Sign-In Error: ", error));
-        });
+#play-pause-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 28px;
+    cursor: pointer;
+}
 
-        // Google Logout
-        document.getElementById('google-logout-button').addEventListener('click', () => {
-            firebase.auth().signOut().then(() => {
-                localStorage.removeItem('google_user');
-                updateGoogleUI(null);
-            }).catch(error => console.error("Google Sign-Out Error: ", error));
-        });
+/* Search Bar */
+#search-container {
+    margin-top: 20px;
+}
 
-        function updateGoogleUI(user) {
-            if (user) {
-                document.getElementById('user-info').innerText = `Logged in as: ${user.displayName}`;
-                document.getElementById('google-login-button').style.display = 'none';
-                document.getElementById('google-logout-button').style.display = 'block';
-            } else {
-                document.getElementById('user-info').innerText = '';
-                document.getElementById('google-login-button').style.display = 'block';
-                document.getElementById('google-logout-button').style.display = 'none';
-            }
-        }
+#search-input {
+    padding: 8px;
+    border-radius: 4px;
+    border: none;
+    width: 200px;
+}
 
-        const savedGoogleUser = localStorage.getItem('google_user');
-        if (savedGoogleUser) updateGoogleUI(JSON.parse(savedGoogleUser));
+#search-button {
+    padding: 8px 12px;
+    margin-left: 5px;
+    border-radius: 4px;
+    border: none;
+    background-color: darkblue;
+    color: white;
+    cursor: pointer;
+}
 
-        // YouTube Player
-        let player;
-        function onYouTubeIframeAPIReady() {
-            player = new YT.Player('youtube-player', {
-                height: '360',
-                width: '640',
-                videoId: '',
-                playerVars: { 'autoplay': 0, 'controls': 1 },
-                events: {
-                    'onReady': onPlayerReady
-                }
-            });
-        }
+/* Right Section (Authentication) */
+#auth-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
 
-        function onPlayerReady(event) {
-            document.getElementById('play-pause-btn').addEventListener('click', () => {
-                if (player.getPlayerState() === 1) {
-                    player.pauseVideo();
-                    document.getElementById('play-pause-btn').innerText = '▶️';
-                } else {
-                    player.playVideo();
-                    document.getElementById('play-pause-btn').innerText = '⏸️';
-                }
-            });
-        }
+button {
+    background-color: darkblue;
+    border: none;
+    padding: 8px 12px;
+    color: white;
+    cursor: pointer;
+    border-radius: 4px;
+    margin: 5px;
+}
 
-        document.getElementById('search-button').addEventListener('click', () => {
-            const query = document.getElementById('search-input').value;
-            fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${query}&type=video&key=AIzaSyBFfY5CZScu8FdE2oLjaCTQ3H5WbAQXos8`)
-                .then(response => response.json())
-                .then(data => {
-                    const results = document.getElementById('search-results');
-                    results.innerHTML = '';
-                    data.items.forEach(item => {
-                        const button = document.createElement('button');
-                        button.innerText = item.snippet.title;
-                        button.addEventListener('click', () => {
-                            player.loadVideoById(item.id.videoId);
-                            results.innerHTML = ''; // Clear search results
-                        });
-                        results.appendChild(button);
-                    });
-                });
-        });
-    </script>
-</body>
-</html>
+button:hover {
+    background-color: #1a1aff;
+}
