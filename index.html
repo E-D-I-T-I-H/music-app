@@ -91,7 +91,6 @@
             player = new YT.Player('youtube-player', {
                 height: '360',
                 width: '640',
-                videoId: '',
                 playerVars: { 'autoplay': 0, 'controls': 1 },
                 events: {
                     'onReady': onPlayerReady
@@ -139,6 +138,17 @@
                 })
                 .catch(error => console.error("YouTube Search Error: ", error));
         });
+
+        // Track search history
+        let searchHistory = [];
+        document.getElementById('search-button').addEventListener('click', () => {
+            const query = document.getElementById('search-input').value;
+            if (query && !searchHistory.includes(query)) {
+                searchHistory.push(query);
+                console.log("Search History:", searchHistory);
+            }
+        });
+
     </script>
 </body>
 </html>
