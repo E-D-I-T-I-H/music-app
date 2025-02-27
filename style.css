@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Music App</title>
-
     <link rel="stylesheet" href="style.css">
 
     <!-- YouTube API -->
@@ -55,11 +54,14 @@
         const db = firebase.database().ref("playback");
 
         let player;
+        let playlist = ["dQw4w9WgXcQ", "JGwWNGJdvx8", "3JZ_D3ELwOQ"]; // Default YouTube Video IDs
+        let currentIndex = 0;
+
         function onYouTubeIframeAPIReady() {
             player = new YT.Player('player', {
                 height: '225',
                 width: '400',
-                videoId: '',
+                videoId: playlist[currentIndex],
                 playerVars: { 'playsinline': 1 },
                 events: {
                     'onReady': onPlayerReady,
@@ -74,6 +76,7 @@
                     syncPlayback();
                 }
             });
+            updateSeekBar();
         }
 
         function onPlayerStateChange(event) {
@@ -86,9 +89,7 @@
             db.on("value", snapshot => {
                 if (snapshot.exists()) {
                     const data = snapshot.val();
-                    const currentVideoId = player.getVideoData().video_id;
-                    
-                    if (data.videoId !== currentVideoId) {
+                    if (data.videoId !== player.getVideoData().video_id) {
                         player.loadVideoById(data.videoId, data.currentTime);
                     } else {
                         player.seekTo(data.currentTime);
@@ -110,6 +111,7 @@
             });
         }
 
+        // Play/Pause Button
         document.getElementById("play-pause-btn").addEventListener("click", () => {
             const state = player.getPlayerState();
             if (state === YT.PlayerState.PLAYING) {
@@ -117,6 +119,32 @@
             } else {
                 player.playVideo();
             }
+        });
+
+        // Seek Bar (Fast Forward & Rewind)
+        const seekBar = document.getElementById("seek-bar");
+        function updateSeekBar() {
+            setInterval(() => {
+                seekBar.max = player.getDuration();
+                seekBar.value = player.getCurrentTime();
+            }, 1000);
+        }
+
+        seekBar.addEventListener("input", () => {
+            player.seekTo(seekBar.value);
+        });
+
+        // Previous/Next Buttons
+        document.getElementById("prev-btn").addEventListener("click", () => {
+            currentIndex = (currentIndex - 1 + playlist.length) % playlist.length;
+            player.loadVideoById(playlist[currentIndex]);
+            updateFirebase();
+        });
+
+        document.getElementById("next-btn").addEventListener("click", () => {
+            currentIndex = (currentIndex + 1) % playlist.length;
+            player.loadVideoById(playlist[currentIndex]);
+            updateFirebase();
         });
 
         // Google Authentication
@@ -140,7 +168,7 @@
             } else {
                 loginBtn.style.display = "block";
                 logoutBtn.style.display = "none";
-                db.off(); // Stop listening for changes if logged out
+                db.off();
             }
         });
 
