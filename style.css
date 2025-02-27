@@ -1,111 +1,142 @@
-/* Reset styles */
-* {
+/* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #121212;
+    color: #fff;
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
-    font-family: Arial, sans-serif;
-}
-
-body {
     display: flex;
     flex-direction: column;
-    height: 100vh;
-    background-color: #121212;
-    color: white;
-    padding: 20px;
-}
-
-/* Top Bar */
-.top-bar {
-    display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 10px 20px;
-}
-
-#google-login-button,
-#google-logout-button {
-    background: #1db954;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 14px;
-}
-
-#google-login-button:hover,
-#google-logout-button:hover {
-    background: #17a349;
 }
 
 /* Main Layout */
-.main-content {
+.container {
     display: flex;
-    flex: 1;
-    gap: 20px;
+    width: 90%;
+    max-width: 1200px;
+    margin-top: 20px;
+    justify-content: space-between;
 }
 
-/* Video Player Section */
-#youtube-player {
+/* Video Player (Left) */
+.left-section {
     flex: 2;
+    max-width: 60%;
+}
+#youtube-player {
+    width: 100%;
+    height: 360px;
     background: #000;
-    height: 300px;
-    border-radius: 8px;
+    border-radius: 10px;
+    overflow: hidden;
 }
 
-/* Search Section */
-.search-container {
+/* Authentication (Right) */
+.right-section {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
 }
-
-#search-input {
-    width: 100%;
-    padding: 10px;
-    border: none;
-    border-radius: 5px;
-    margin-bottom: 10px;
-}
-
-#search-results button {
-    width: 100%;
-    background: #222;
+#google-login-button, #google-logout-button {
+    background-color: #1db954;
     color: white;
     border: none;
-    padding: 8px;
-    margin: 5px 0;
-    border-radius: 5px;
+    padding: 10px 15px;
+    margin-bottom: 10px;
     cursor: pointer;
+    font-size: 14px;
+    border-radius: 5px;
+    transition: 0.3s;
+}
+#google-login-button:hover, #google-logout-button:hover {
+    background-color: #17a44d;
 }
 
-#search-results button:hover {
+/* Search Bar */
+.search-container {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+    width: 90%;
+}
+#search-input {
+    width: 60%;
+    padding: 10px;
+    border-radius: 20px;
+    border: none;
+    font-size: 16px;
+    text-align: center;
     background: #333;
+    color: white;
+}
+#search-button {
+    margin-left: 10px;
+    padding: 10px 15px;
+    font-size: 16px;
+    background-color: #1db954;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: 0.3s;
+}
+#search-button:hover {
+    background-color: #17a44d;
 }
 
-/* Playback Controls */
-.playback-controls {
+/* Search Results */
+#search-results {
+    width: 90%;
+    max-width: 600px;
+    text-align: center;
+    margin-top: 10px;
+}
+#search-results button {
+    display: block;
+    width: 100%;
+    background-color: #333;
+    color: white;
+    border: none;
+    padding: 10px;
+    margin: 5px 0;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: 0.3s;
+}
+#search-results button:hover {
+    background-color: #444;
+}
+
+/* Bottom Controls */
+.bottom-controls {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 15px;
+    background-color: #222;
+    width: 100%;
     padding: 15px;
-    background: #1a1a1a;
-    border-radius: 8px;
-    margin-top: auto;
+    position: fixed;
+    bottom: 0;
 }
-
-.playback-controls button {
+.bottom-controls button {
     background: none;
     border: none;
-    font-size: 24px;
     color: white;
+    font-size: 24px;
+    margin: 0 10px;
     cursor: pointer;
+    transition: 0.3s;
 }
-
-.playback-controls button:hover {
+.bottom-controls button:hover {
     color: #1db954;
 }
-
 #seek-bar {
-    flex: 1;
+    width: 40%;
+    height: 5px;
+    background: #444;
+    border-radius: 5px;
+    margin: 0 15px;
+    cursor: pointer;
 }
