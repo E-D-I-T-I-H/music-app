@@ -7,48 +7,61 @@ body {
     padding: 0;
     display: flex;
     justify-content: flex-start;
-    align-items: center;
+    align-items: flex-start;
     height: 100vh;
 }
 
 /* Main Layout */
 #main-container {
     display: flex;
-    flex-direction: row;
     width: 100%;
     padding: 20px;
 }
 
-/* Left Section: Video */
+/* Right Section: YouTube Player */
 #video-container {
-    flex: 1;
-    max-width: 400px;
-}
-
-/* Center Section: Controls */
-#controls-container {
-    flex: 2;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    margin-left: 20px;
+    align-items: flex-end;
+    width: 400px;
+    position: absolute;
+    top: 10px;
+    right: 10px;
 }
 
-/* Seek Bar with Prev/Next */
+/* Search Bar */
+#search-container {
+    width: 100%;
+    margin-top: 10px;
+}
+
+#search-input {
+    width: 300px;
+    padding: 8px;
+    border-radius: 5px;
+    border: none;
+}
+
+#search-button {
+    padding: 8px 12px;
+    margin-left: 5px;
+    cursor: pointer;
+    background-color: #ff4500;
+    color: white;
+    border: none;
+    border-radius: 5px;
+}
+
+#search-button:hover {
+    background-color: #e03d00;
+}
+
+/* Seek Bar & Buttons */
 #seek-bar-container {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 300px;
-    margin-top: 10px;
-}
-
-#seek-bar {
-    width: 200px;
-    height: 5px;
-    background: #555;
-    border-radius: 5px;
-    cursor: pointer;
+    margin-top: 15px;
 }
 
 #prev-btn, #next-btn {
@@ -64,12 +77,19 @@ body {
     opacity: 0.7;
 }
 
+#seek-bar {
+    width: 250px;
+    height: 5px;
+    background: #555;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
 /* Play/Pause Button */
 #play-pause-container {
     display: flex;
     justify-content: center;
-    width: 300px;
-    margin-top: 5px;
+    margin-top: 10px;
 }
 
 #play-pause-btn {
@@ -84,39 +104,11 @@ body {
     opacity: 0.7;
 }
 
-/* Search Box */
-#search-container {
-    margin-top: 20px;
-    display: flex;
-}
-
-#search-input {
-    width: 180px;
-    padding: 5px;
-    border-radius: 5px;
-    border: none;
-}
-
-#search-button {
-    padding: 5px 10px;
-    margin-left: 5px;
-    cursor: pointer;
-    background-color: #ff4500;
-    color: white;
-    border: none;
-    border-radius: 5px;
-}
-
-#search-button:hover {
-    background-color: #e03d00;
-}
-
 /* Right Section: Authentication */
 #auth-container {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    margin-left: auto;
+    position: absolute;
+    top: 10px;
+    right: 10px;
 }
 
 #login-btn, #logout-btn {
