@@ -1,93 +1,134 @@
 /* General Styles */
 body {
-    font-family: 'Arial', sans-serif;
-    background-color: #000; /* Black background */
-    color: #fff;
+    font-family: Arial, sans-serif;
+    background-color: #121212;
+    color: white;
     text-align: center;
     margin: 0;
     padding: 0;
 }
 
-/* Heading */
-h1 {
-    font-size: 2rem;
-    margin-top: 20px;
+/* Main Container */
+#main-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 20px;
 }
 
-/* Buttons */
-button {
-    background-color: #0a74da; /* Dark blue */
+/* Video Player Section */
+#video-section {
+    flex: 2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#youtube-player {
+    width: 400px;
+    height: 225px;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+/* Sign-in Section */
+#auth-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+#google-login-button,
+#google-logout-button {
+    background-color: #1DB954;
     color: white;
     border: none;
     padding: 10px 20px;
     margin: 10px;
-    font-size: 1rem;
-    border-radius: 5px;
     cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-button:hover {
-    background-color: #0959a0; /* Slightly darker blue */
-}
-
-/* Input Field */
-input {
-    width: 80%;
-    max-width: 400px;
-    padding: 10px;
-    margin: 10px;
-    font-size: 1rem;
-    border: 1px solid #0a74da;
     border-radius: 5px;
-    background-color: #222;
-    color: white;
+    font-size: 16px;
 }
 
-/* Search Results */
-#search-results {
-    margin-top: 20px;
-}
-
-.song-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background-color: #111;
-    padding: 10px;
-    margin: 10px auto;
-    border-radius: 5px;
-    width: 80%;
-    max-width: 500px;
-}
-
-.song-item img {
-    border-radius: 5px;
-}
-
-.song-item span {
-    flex-grow: 1;
-    margin-left: 10px;
+#google-login-button:hover,
+#google-logout-button:hover {
+    background-color: #17a74b;
 }
 
 /* Playback Controls */
 #playback-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
     margin-top: 20px;
 }
 
 #playback-controls button {
-    width: 80px;
-    font-size: 1.1rem;
+    background-color: #1DB954;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+    width: 50px;
+    height: 50px;
 }
 
-/* Spotify Player Container */
-#spotify-player-container {
+#playback-controls button:hover {
+    background-color: #17a74b;
+}
+
+/* Seek Bar */
+#seek-bar {
+    width: 300px;
+}
+
+/* Search Section */
+#search-container {
     margin-top: 20px;
-    padding: 20px;
-    background-color: #111;
-    border-radius: 10px;
-    width: 80%;
-    max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;
+}
+
+#search-input {
+    width: 60%;
+    padding: 10px;
+    border-radius: 5px;
+    border: none;
+}
+
+#search-button {
+    padding: 10px 15px;
+    background-color: #1DB954;
+    border: none;
+    color: white;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+#search-button:hover {
+    background-color: #17a74b;
+}
+
+/* Search Results */
+#search-results {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-top: 10px;
+}
+
+#search-results button {
+    background-color: #222;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#search-results button:hover {
+    background-color: #333;
 }
