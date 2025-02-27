@@ -4,21 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Music App</title>
+
+    <!-- Link to External CSS -->
     <link rel="stylesheet" href="style.css">
 
-    <!-- YouTube API -->
-    <script src="https://www.youtube.com/iframe_api"></script>
-
     <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+
+    <!-- YouTube IFrame API -->
+    <script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body>
+    <!-- Top Container -->
     <div id="top-container">
+        <!-- Left Side (YouTube Player & Controls) -->
         <div id="left-container">
             <div id="player"></div>
 
+            <!-- Search Bar -->
+            <div id="search-container">
+                <input type="text" id="search-input" placeholder="Search for songs...">
+                <button id="search-button">Search</button>
+            </div>
+
+            <!-- Seek Bar & Controls -->
             <div id="controls-container">
                 <div id="seek-bar-container">
                     <button id="prev-btn">⏮️</button>
@@ -31,144 +42,158 @@
             </div>
         </div>
 
-        <!-- Sign-In/Sign-Out -->
+        <!-- Right Side (Authentication) -->
         <div id="auth-container">
             <button id="login-btn">Sign in with Google</button>
-            <button id="logout-btn" style="display:none;">Sign out</button>
+            <button id="logout-btn" style="display: none;">Sign out</button>
         </div>
     </div>
 
+    <!-- Search Results -->
+    <div id="search-results"></div>
+
     <script>
+        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBFfY5CZScu8FdE2oLjaCTQ3H5WbAQXos8",
-            authDomain: "musicapp-3a435.firebaseapp.com",
-            databaseURL: "https://your-project-id.firebaseio.com/",
-            projectId: "musicapp-3a435",
-            storageBucket: "musicapp-3a435.appspot.com",
-            messagingSenderId: "224181252004",
-            appId: "1:224181252004:web:4589e9da0d6400e5fd1b31"
+            authDomain: "your-app.firebaseapp.com",
+            databaseURL: "https://your-app.firebaseio.com",
+            projectId: "your-app",
+            storageBucket: "your-app.appspot.com",
+            messagingSenderId: "your-sender-id",
+            appId: "your-app-id"
         };
 
-        firebase.initializeApp(firebaseConfig);
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
-        const db = firebase.database().ref("playback");
+        const database = firebase.database();
 
+        // YouTube Player Setup
         let player;
-        let playlist = ["dQw4w9WgXcQ", "JGwWNGJdvx8", "3JZ_D3ELwOQ"]; // Default YouTube Video IDs
+        let playlist = []; // Stores searched video IDs
         let currentIndex = 0;
 
         function onYouTubeIframeAPIReady() {
             player = new YT.Player('player', {
                 height: '225',
                 width: '400',
-                videoId: playlist[currentIndex],
-                playerVars: { 'playsinline': 1 },
                 events: {
-                    'onReady': onPlayerReady,
                     'onStateChange': onPlayerStateChange
                 }
-            });
-        }
-
-        function onPlayerReady(event) {
-            auth.onAuthStateChanged(user => {
-                if (user) {
-                    syncPlayback();
-                }
-            });
-            updateSeekBar();
-        }
-
-        function onPlayerStateChange(event) {
-            if (event.data === YT.PlayerState.PLAYING || event.data === YT.PlayerState.PAUSED) {
-                updateFirebase();
-            }
-        }
-
-        function syncPlayback() {
-            db.on("value", snapshot => {
-                if (snapshot.exists()) {
-                    const data = snapshot.val();
-                    if (data.videoId !== player.getVideoData().video_id) {
-                        player.loadVideoById(data.videoId, data.currentTime);
-                    } else {
-                        player.seekTo(data.currentTime);
-                        if (data.isPlaying) {
-                            player.playVideo();
-                        } else {
-                            player.pauseVideo();
-                        }
-                    }
-                }
-            });
-        }
-
-        function updateFirebase() {
-            db.set({
-                videoId: player.getVideoData().video_id,
-                currentTime: player.getCurrentTime(),
-                isPlaying: player.getPlayerState() === YT.PlayerState.PLAYING
             });
         }
 
         // Play/Pause Button
         document.getElementById("play-pause-btn").addEventListener("click", () => {
             const state = player.getPlayerState();
-            if (state === YT.PlayerState.PLAYING) {
+            if (state === 1) {
                 player.pauseVideo();
+                document.getElementById("play-pause-btn").innerText = "▶️";
             } else {
                 player.playVideo();
+                document.getElementById("play-pause-btn").innerText = "⏸️";
             }
         });
 
-        // Seek Bar (Fast Forward & Rewind)
-        const seekBar = document.getElementById("seek-bar");
-        function updateSeekBar() {
-            setInterval(() => {
-                seekBar.max = player.getDuration();
-                seekBar.value = player.getCurrentTime();
-            }, 1000);
-        }
-
-        seekBar.addEventListener("input", () => {
-            player.seekTo(seekBar.value);
-        });
-
-        // Previous/Next Buttons
+        // Previous Video
         document.getElementById("prev-btn").addEventListener("click", () => {
             currentIndex = (currentIndex - 1 + playlist.length) % playlist.length;
             player.loadVideoById(playlist[currentIndex]);
             updateFirebase();
         });
 
+        // Next Video
         document.getElementById("next-btn").addEventListener("click", () => {
             currentIndex = (currentIndex + 1) % playlist.length;
             player.loadVideoById(playlist[currentIndex]);
             updateFirebase();
         });
 
-        // Google Authentication
-        const loginBtn = document.getElementById("login-btn");
-        const logoutBtn = document.getElementById("logout-btn");
+        // Seek Bar Update
+        const seekBar = document.getElementById("seek-bar");
 
-        loginBtn.addEventListener("click", () => {
+        function updateSeekBar() {
+            setInterval(() => {
+                if (player && player.getDuration) {
+                    seekBar.max = player.getDuration();
+                    seekBar.value = player.getCurrentTime();
+                }
+            }, 1000);
+        }
+
+        seekBar.addEventListener("input", () => {
+            player.seekTo(seekBar.value);
+            updateFirebase();
+        });
+
+        // Handle Search
+        document.getElementById("search-button").addEventListener("click", () => {
+            const query = document.getElementById("search-input").value;
+            fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${query}&type=video&key=AIzaSyBFfY5CZScu8FdE2oLjaCTQ3H5WbAQXos8`)
+                .then(response => response.json())
+                .then(data => {
+                    const results = document.getElementById("search-results");
+                    results.innerHTML = "";
+                    playlist = [];
+                    data.items.forEach(item => {
+                        const videoId = item.id.videoId;
+                        playlist.push(videoId);
+
+                        const button = document.createElement("button");
+                        button.innerText = item.snippet.title;
+                        button.addEventListener("click", () => {
+                            currentIndex = playlist.indexOf(videoId);
+                            player.loadVideoById(videoId);
+                            updateFirebase();
+                        });
+
+                        results.appendChild(button);
+                    });
+                });
+        });
+
+        // Firebase Sync
+        function updateFirebase() {
+            database.ref("music").set({
+                videoId: playlist[currentIndex],
+                seekTime: player.getCurrentTime()
+            });
+        }
+
+        database.ref("music").on("value", (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                player.loadVideoById(data.videoId);
+                player.seekTo(data.seekTime);
+            }
+        });
+
+        // Google Sign-In
+        document.getElementById("login-btn").addEventListener("click", () => {
             const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider);
+            auth.signInWithPopup(provider).then((result) => {
+                document.getElementById("login-btn").style.display = "none";
+                document.getElementById("logout-btn").style.display = "block";
+            });
         });
 
-        logoutBtn.addEventListener("click", () => {
-            auth.signOut();
+        // Google Sign-Out
+        document.getElementById("logout-btn").addEventListener("click", () => {
+            auth.signOut().then(() => {
+                document.getElementById("login-btn").style.display = "block";
+                document.getElementById("logout-btn").style.display = "none";
+            });
         });
 
-        auth.onAuthStateChanged(user => {
+        // Update UI if already logged in
+        auth.onAuthStateChanged((user) => {
             if (user) {
-                loginBtn.style.display = "none";
-                logoutBtn.style.display = "block";
-                syncPlayback();
+                document.getElementById("login-btn").style.display = "none";
+                document.getElementById("logout-btn").style.display = "block";
             } else {
-                loginBtn.style.display = "block";
-                logoutBtn.style.display = "none";
-                db.off();
+                document.getElementById("login-btn").style.display = "block";
+                document.getElementById("logout-btn").style.display = "none";
             }
         });
 
