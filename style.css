@@ -10,7 +10,7 @@ body {
     height: 100vh;
 }
 
-/* --- TOP CONTAINER: YouTube Player + Search + Controls --- */
+/* --- TOP CONTAINER: YouTube Player + Search + Controls + Auth --- */
 #top-container {
     display: flex;
     justify-content: space-between;
@@ -101,6 +101,8 @@ body {
     justify-content: center;
     width: 250px; /* SAME AS SEEK BAR */
     margin-top: 8px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 #play-pause-btn {
@@ -115,11 +117,12 @@ body {
     opacity: 0.7;
 }
 
-/* --- RIGHT: Sign In/Sign Out --- */
+/* --- RIGHT: Sign In/Sign Out (Moved to Rightmost Side) --- */
 #auth-container {
     display: flex;
     align-items: center;
     gap: 10px;
+    margin-left: auto; /* Pushes to rightmost side */
 }
 
 #login-btn, #logout-btn {
