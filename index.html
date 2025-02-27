@@ -5,39 +5,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Music App</title>
 
+    <!-- Link to external style.css file -->
     <link rel="stylesheet" href="style.css">
+
+    <!-- Firebase SDK (CDN links) -->
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
+
+    <!-- YouTube IFrame API -->
     <script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body>
+    <div class="container">
+        <!-- Left Section: Video Player -->
+        <div class="left-section">
+            <div id="youtube-player"></div>
+        </div>
 
-    <!-- Top Bar -->
-    <div class="top-bar">
-        <h1>Music App</h1>
-        <div>
+        <!-- Right Section: Authentication -->
+        <div class="right-section">
             <button id="google-login-button">Sign in with Google</button>
             <button id="google-logout-button" style="display: none;">Sign out</button>
+            <div id="user-info"></div>
         </div>
     </div>
 
-    <!-- Main Layout -->
-    <div class="main-content">
-        <!-- YouTube Player -->
-        <div id="youtube-player"></div>
-
-        <!-- Search Section -->
-        <div class="search-container">
-            <input type="text" id="search-input" placeholder="Search for songs...">
-            <button id="search-button">Search</button>
-            <div id="search-results"></div>
-        </div>
+    <!-- Search Bar -->
+    <div class="search-container">
+        <input type="text" id="search-input" placeholder="Search for songs...">
+        <button id="search-button">🔍</button>
     </div>
 
-    <!-- Playback Controls -->
-    <div class="playback-controls">
+    <!-- Search Results -->
+    <div id="search-results"></div>
+
+    <!-- Bottom Controls -->
+    <div class="bottom-controls">
         <button id="prev-btn">⏮️</button>
-        <button id="play-pause-btn">⏯️</button>
+        <button id="play-pause-btn">▶️</button>
         <input type="range" id="seek-bar" min="0" max="100" value="0">
         <button id="next-btn">⏭️</button>
     </div>
@@ -50,9 +55,11 @@
             projectId: "musicapp-3a435",
             storageBucket: "musicapp-3a435.appspot.com",
             messagingSenderId: "224181252004",
-            appId: "1:224181252004:web:4589e9da0d6400e5fd1b31"
+            appId: "1:224181252004:web:4589e9da0d6400e5fd1b31",
+            measurementId: "G-FY5VPQG5NZ"
         };
 
+        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
 
         // Google Login
@@ -74,42 +81,46 @@
         });
 
         function updateGoogleUI(user) {
-            document.getElementById('google-login-button').style.display = user ? 'none' : 'block';
-            document.getElementById('google-logout-button').style.display = user ? 'block' : 'none';
+            if (user) {
+                document.getElementById('user-info').innerText = `Logged in as: ${user.displayName}`;
+                document.getElementById('google-login-button').style.display = 'none';
+                document.getElementById('google-logout-button').style.display = 'block';
+            } else {
+                document.getElementById('user-info').innerText = '';
+                document.getElementById('google-login-button').style.display = 'block';
+                document.getElementById('google-logout-button').style.display = 'none';
+            }
         }
 
-        if (localStorage.getItem('google_user')) {
-            updateGoogleUI(JSON.parse(localStorage.getItem('google_user')));
-        }
+        const savedGoogleUser = localStorage.getItem('google_user');
+        if (savedGoogleUser) updateGoogleUI(JSON.parse(savedGoogleUser));
 
         // YouTube Player
         let player;
         function onYouTubeIframeAPIReady() {
             player = new YT.Player('youtube-player', {
-                height: '300',
-                width: '480',
+                height: '360',
+                width: '640',
                 videoId: '',
                 playerVars: { 'autoplay': 0, 'controls': 1 },
-                events: { 'onReady': onPlayerReady }
+                events: {
+                    'onReady': onPlayerReady
+                }
             });
         }
 
-        function onPlayerReady() {
+        function onPlayerReady(event) {
             document.getElementById('play-pause-btn').addEventListener('click', () => {
                 if (player.getPlayerState() === 1) {
                     player.pauseVideo();
+                    document.getElementById('play-pause-btn').innerText = '▶️';
                 } else {
                     player.playVideo();
+                    document.getElementById('play-pause-btn').innerText = '⏸️';
                 }
-            });
-
-            document.getElementById('seek-bar').addEventListener('input', (event) => {
-                const newTime = (event.target.value / 100) * player.getDuration();
-                player.seekTo(newTime, true);
             });
         }
 
-        // Search for Songs
         document.getElementById('search-button').addEventListener('click', () => {
             const query = document.getElementById('search-input').value;
             fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${query}&type=video&key=AIzaSyBFfY5CZScu8FdE2oLjaCTQ3H5WbAQXos8`)
@@ -117,19 +128,17 @@
                 .then(data => {
                     const results = document.getElementById('search-results');
                     results.innerHTML = '';
-
                     data.items.forEach(item => {
                         const button = document.createElement('button');
                         button.innerText = item.snippet.title;
                         button.addEventListener('click', () => {
                             player.loadVideoById(item.id.videoId);
-                            results.innerHTML = '';  // Hide results after selecting
+                            results.innerHTML = ''; // Clear search results
                         });
                         results.appendChild(button);
                     });
                 });
         });
     </script>
-
 </body>
 </html>
