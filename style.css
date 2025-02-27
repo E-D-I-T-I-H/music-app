@@ -1,144 +1,149 @@
-/* General Page Styles */
-body {
-    font-family: Arial, sans-serif;
-    background-color: #181818;
-    color: white;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music App</title>
 
-/* --- TOP CONTAINER: YouTube Player + Search + Controls + Auth --- */
-#top-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    width: 100%;
-    padding: 15px;
-}
+    <link rel="stylesheet" href="style.css">
 
-/* --- LEFT: YouTube Player & Controls --- */
-#left-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center; /* Centers everything under the player */
-}
+    <!-- YouTube API -->
+    <script src="https://www.youtube.com/iframe_api"></script>
 
-/* YouTube Player */
-#player {
-    width: 400px;
-    height: 225px;
-}
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
+</head>
+<body>
+    <div id="top-container">
+        <div id="left-container">
+            <div id="player"></div>
 
-/* Search Bar */
-#search-container {
-    margin-top: 10px;
-}
+            <div id="controls-container">
+                <div id="seek-bar-container">
+                    <button id="prev-btn">⏮️</button>
+                    <input type="range" id="seek-bar" min="0" value="0">
+                    <button id="next-btn">⏭️</button>
+                </div>
+                <div id="play-pause-container">
+                    <button id="play-pause-btn">▶️</button>
+                </div>
+            </div>
+        </div>
 
-#search-input {
-    width: 250px;
-    padding: 8px;
-    border-radius: 5px;
-    border: none;
-}
+        <!-- Sign-In/Sign-Out -->
+        <div id="auth-container">
+            <button id="login-btn">Sign in with Google</button>
+            <button id="logout-btn" style="display:none;">Sign out</button>
+        </div>
+    </div>
 
-#search-button {
-    padding: 8px 12px;
-    margin-left: 5px;
-    cursor: pointer;
-    background-color: #ff4500;
-    color: white;
-    border: none;
-    border-radius: 5px;
-}
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBFfY5CZScu8FdE2oLjaCTQ3H5WbAQXos8",
+            authDomain: "musicapp-3a435.firebaseapp.com",
+            databaseURL: "https://your-project-id.firebaseio.com/",
+            projectId: "musicapp-3a435",
+            storageBucket: "musicapp-3a435.appspot.com",
+            messagingSenderId: "224181252004",
+            appId: "1:224181252004:web:4589e9da0d6400e5fd1b31"
+        };
 
-#search-button:hover {
-    background-color: #e03d00;
-}
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database().ref("playback");
 
-/* --- SEEK BAR & BUTTONS (CENTERED TO YOUTUBE PLAYER) --- */
-#controls-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center; /* Centers everything */
-    width: 400px; /* SAME WIDTH AS YOUTUBE PLAYER */
-    margin-top: 15px;
-}
+        let player;
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('player', {
+                height: '225',
+                width: '400',
+                videoId: '',
+                playerVars: { 'playsinline': 1 },
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange
+                }
+            });
+        }
 
-/* Seek Bar & Prev/Next Buttons */
-#seek-bar-container {
-    display: flex;
-    align-items: center;
-    justify-content: center; /* Centers the seek bar */
-    width: 100%;
-    gap: 15px;
-}
+        function onPlayerReady(event) {
+            auth.onAuthStateChanged(user => {
+                if (user) {
+                    syncPlayback();
+                }
+            });
+        }
 
-/* Seek Bar */
-#seek-bar {
-    flex-grow: 1;
-    height: 5px;
-    background: #555;
-    border-radius: 5px;
-    cursor: pointer;
-}
+        function onPlayerStateChange(event) {
+            if (event.data === YT.PlayerState.PLAYING || event.data === YT.PlayerState.PAUSED) {
+                updateFirebase();
+            }
+        }
 
-/* Prev/Next Buttons */
-#prev-btn, #next-btn {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 20px;
-    cursor: pointer;
-}
+        function syncPlayback() {
+            db.on("value", snapshot => {
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    const currentVideoId = player.getVideoData().video_id;
+                    
+                    if (data.videoId !== currentVideoId) {
+                        player.loadVideoById(data.videoId, data.currentTime);
+                    } else {
+                        player.seekTo(data.currentTime);
+                        if (data.isPlaying) {
+                            player.playVideo();
+                        } else {
+                            player.pauseVideo();
+                        }
+                    }
+                }
+            });
+        }
 
-#prev-btn:hover, #next-btn:hover {
-    opacity: 0.7;
-}
+        function updateFirebase() {
+            db.set({
+                videoId: player.getVideoData().video_id,
+                currentTime: player.getCurrentTime(),
+                isPlaying: player.getPlayerState() === YT.PlayerState.PLAYING
+            });
+        }
 
-/* Play/Pause Button (Centered UNDER Seek Bar) */
-#play-pause-container {
-    display: flex;
-    justify-content: center;
-    width: 100%;
-    margin-top: 8px;
-}
+        document.getElementById("play-pause-btn").addEventListener("click", () => {
+            const state = player.getPlayerState();
+            if (state === YT.PlayerState.PLAYING) {
+                player.pauseVideo();
+            } else {
+                player.playVideo();
+            }
+        });
 
-#play-pause-btn {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 24px;
-    cursor: pointer;
-}
+        // Google Authentication
+        const loginBtn = document.getElementById("login-btn");
+        const logoutBtn = document.getElementById("logout-btn");
 
-#play-pause-btn:hover {
-    opacity: 0.7;
-}
+        loginBtn.addEventListener("click", () => {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider);
+        });
 
-/* --- RIGHT: Sign In/Sign Out (Moved to Rightmost Side) --- */
-#auth-container {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
+        logoutBtn.addEventListener("click", () => {
+            auth.signOut();
+        });
 
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                loginBtn.style.display = "none";
+                logoutBtn.style.display = "block";
+                syncPlayback();
+            } else {
+                loginBtn.style.display = "block";
+                logoutBtn.style.display = "none";
+                db.off(); // Stop listening for changes if logged out
+            }
+        });
 
-#login-btn, #logout-btn {
-    background: none;
-    border: 1px solid white;
-    color: white;
-    padding: 6px 12px;
-    cursor: pointer;
-    border-radius: 5px;
-}
-
-#login-btn:hover, #logout-btn:hover {
-    background-color: white;
-    color: black;
-}
+    </script>
+</body>
+</html>
