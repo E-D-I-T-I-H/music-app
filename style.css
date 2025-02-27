@@ -98,7 +98,7 @@ body {
 /* Play/Pause Button (Centered Below Seek Bar) */
 #play-pause-container {
     margin-top: 10px;
-    text-align: center;
+    text-align: flex-start;
     width: 100%;
 }
 
