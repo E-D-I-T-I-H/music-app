@@ -3,117 +3,187 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Music Sync</title>
+    <title>Music App</title>
+
+    <!-- External CSS -->
     <link rel="stylesheet" href="style.css">
-    <script src="https://apis.google.com/js/api.js"></script>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+
+    <!-- YouTube API -->
+    <script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body>
-    <div id="main-container">
-        <!-- Left Section: YouTube Player -->
-        <div id="video-container">
-            <div id="video-player"></div>
-        </div>
+    <!-- Top Container -->
+    <div id="top-container">
+        <!-- Left: YouTube Player & Controls -->
+        <div id="left-container">
+            <div id="player"></div>
 
-        <!-- Center Section: Playback Controls -->
-        <div id="controls-container">
-            <div id="seek-bar-container">
-                <button id="prev-btn">«</button>
-                <input type="range" id="seek-bar" value="0">
-                <button id="next-btn">»</button>
-            </div>
-            <div id="play-pause-container">
-                <button id="play-pause-btn">▶</button>
-            </div>
+            <!-- Search -->
             <div id="search-container">
-                <input type="text" id="search-input" placeholder="Search YouTube...">
+                <input type="text" id="search-input" placeholder="Search for songs...">
                 <button id="search-button">Search</button>
             </div>
+
+            <!-- Controls -->
+            <div id="controls-container">
+                <div id="seek-bar-container">
+                    <button id="prev-btn">⏮️</button>
+                    <input type="range" id="seek-bar" min="0" value="0">
+                    <button id="next-btn">⏭️</button>
+                </div>
+                <button id="play-pause-btn">▶️</button>
+            </div>
         </div>
 
-        <!-- Right Section: Authentication -->
+        <!-- Right: Sign-In -->
         <div id="auth-container">
-            <button id="login-btn">Sign In</button>
-            <button id="logout-btn" style="display:none;">Sign Out</button>
+            <button id="login-btn">Sign in with Google</button>
+            <button id="logout-btn" style="display: none;">Sign out</button>
         </div>
     </div>
 
+    <!-- Playlist (Visible to Everyone) -->
+    <div id="playlist-container">
+        <h2>Playlist</h2>
+        <ul id="playlist"></ul>
+    </div>
+
     <script>
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyBFfY5CZScu8FdE2oLjaCTQ3H5WbAQXos8",
+            authDomain: "your-app.firebaseapp.com",
+            databaseURL: "https://your-app.firebaseio.com",
+            projectId: "your-app",
+            storageBucket: "your-app.appspot.com",
+            messagingSenderId: "your-sender-id",
+            appId: "your-app-id"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const database = firebase.database();
+
+        // YouTube Player
         let player;
-        let isPlaying = false;
+        let playlist = [];
+        let currentIndex = 0;
 
         function onYouTubeIframeAPIReady() {
-            player = new YT.Player('video-player', {
-                height: '270',
-                width: '480',
-                playerVars: { 'autoplay': 0, 'controls': 0 },
+            player = new YT.Player('player', {
+                height: '225',
+                width: '400',
                 events: {
-                    'onReady': onPlayerReady,
-                    'onStateChange': onPlayerStateChange
+                    'onStateChange': syncPlayback
                 }
             });
         }
 
-        function onPlayerReady(event) {
-            document.getElementById("play-pause-btn").addEventListener("click", togglePlayPause);
-            document.getElementById("prev-btn").addEventListener("click", () => console.log("Prev Clicked"));
-            document.getElementById("next-btn").addEventListener("click", () => console.log("Next Clicked"));
-        }
-
-        function onPlayerStateChange(event) {
-            if (event.data == YT.PlayerState.PLAYING) {
-                isPlaying = true;
-                document.getElementById("play-pause-btn").textContent = "⏸";
-            } else {
-                isPlaying = false;
-                document.getElementById("play-pause-btn").textContent = "▶";
-            }
-        }
-
-        function togglePlayPause() {
-            if (isPlaying) {
+        // Play/Pause
+        document.getElementById("play-pause-btn").addEventListener("click", () => {
+            const state = player.getPlayerState();
+            if (state === 1) {
                 player.pauseVideo();
+                document.getElementById("play-pause-btn").innerText = "▶️";
             } else {
                 player.playVideo();
+                document.getElementById("play-pause-btn").innerText = "⏸️";
             }
-        }
-
-        document.getElementById("search-button").addEventListener("click", function () {
-            let query = document.getElementById("search-input").value;
-            searchYouTube(query);
         });
 
-        function searchYouTube(query) {
-            gapi.client.init({
-                apiKey: "AIzaSyBFfY5CZScu8FdE2oLjaCTQ3H5WbAQXos8",
-                discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest"]
-            }).then(function () {
-                return gapi.client.youtube.search.list({
-                    part: "snippet",
-                    q: query,
-                    type: "video",
-                    maxResults: 1
+        // Prev/Next
+        document.getElementById("prev-btn").addEventListener("click", () => changeSong(-1));
+        document.getElementById("next-btn").addEventListener("click", () => changeSong(1));
+
+        function changeSong(step) {
+            currentIndex = (currentIndex + step + playlist.length) % playlist.length;
+            player.loadVideoById(playlist[currentIndex]);
+            updateFirebase();
+        }
+
+        // Seek Bar
+        const seekBar = document.getElementById("seek-bar");
+        setInterval(() => {
+            if (player && player.getDuration) {
+                seekBar.max = player.getDuration();
+                seekBar.value = player.getCurrentTime();
+            }
+        }, 1000);
+
+        seekBar.addEventListener("input", () => {
+            player.seekTo(seekBar.value);
+            updateFirebase();
+        });
+
+        // Search
+        document.getElementById("search-button").addEventListener("click", () => {
+            const query = document.getElementById("search-input").value;
+            fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${query}&type=video&key=AIzaSyBFfY5CZScu8FdE2oLjaCTQ3H5WbAQXos8`)
+                .then(response => response.json())
+                .then(data => {
+                    playlist = [];
+                    document.getElementById("playlist").innerHTML = "";
+                    data.items.forEach(item => {
+                        const videoId = item.id.videoId;
+                        playlist.push(videoId);
+                        const li = document.createElement("li");
+                        li.innerText = item.snippet.title;
+                        li.addEventListener("click", () => {
+                            currentIndex = playlist.indexOf(videoId);
+                            player.loadVideoById(videoId);
+                            updateFirebase();
+                        });
+                        document.getElementById("playlist").appendChild(li);
+                    });
                 });
-            }).then(function (response) {
-                let videoId = response.result.items[0].id.videoId;
-                player.loadVideoById(videoId);
-            }).catch(function (err) {
-                console.error("YouTube Search Error:", err);
+        });
+
+        // Firebase Sync
+        function updateFirebase() {
+            database.ref("music").set({
+                videoId: playlist[currentIndex],
+                seekTime: player.getCurrentTime()
             });
         }
 
-        gapi.load("client");
-
-        document.getElementById("login-btn").addEventListener("click", function () {
-            console.log("Login Clicked");
+        database.ref("music").on("value", (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                player.loadVideoById(data.videoId);
+                player.seekTo(data.seekTime);
+            }
         });
 
-        document.getElementById("logout-btn").addEventListener("click", function () {
-            console.log("Logout Clicked");
+        // Google Sign-In
+        document.getElementById("login-btn").addEventListener("click", () => {
+            auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).then(() => {
+                document.getElementById("login-btn").style.display = "none";
+                document.getElementById("logout-btn").style.display = "block";
+            });
         });
 
-        let tag = document.createElement('script');
-        tag.src = "https://www.youtube.com/iframe_api";
-        document.head.appendChild(tag);
+        document.getElementById("logout-btn").addEventListener("click", () => {
+            auth.signOut().then(() => {
+                document.getElementById("login-btn").style.display = "block";
+                document.getElementById("logout-btn").style.display = "none";
+            });
+        });
+
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                document.getElementById("login-btn").style.display = "none";
+                document.getElementById("logout-btn").style.display = "block";
+            } else {
+                document.getElementById("login-btn").style.display = "block";
+                document.getElementById("logout-btn").style.display = "none";
+            }
+        });
+
     </script>
 </body>
 </html>
