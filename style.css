@@ -1,0 +1,139 @@
+/* General Page Styles */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #181818;
+    color: white;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+/* --- TOP CONTAINER: YouTube Player + Search + Controls + Auth --- */
+#top-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
+    padding: 15px;
+}
+
+/* --- LEFT: YouTube Player & Controls --- */
+#left-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+/* YouTube Player */
+#player {
+    width: 400px;
+    height: 225px;
+}
+
+/* Search Bar */
+#search-container {
+    margin-top: 10px;
+}
+
+#search-input {
+    width: 250px;
+    padding: 8px;
+    border-radius: 5px;
+    border: none;
+}
+
+#search-button {
+    padding: 8px 12px;
+    margin-left: 5px;
+    cursor: pointer;
+    background-color: #ff4500;
+    color: white;
+    border: none;
+    border-radius: 5px;
+}
+
+#search-button:hover {
+    background-color: #e03d00;
+}
+
+/* --- SEEK BAR & BUTTONS --- */
+#controls-container {
+    margin-top: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+/* Seek Bar & Prev/Next Buttons */
+#seek-bar-container {
+    display: flex;
+    align-items: center;
+    width: 250px; /* SAME WIDTH AS SLIDER */
+    gap: 10px;
+}
+
+/* Seek Bar */
+#seek-bar {
+    flex-grow: 1;
+    height: 5px;
+    background: #555;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/* Prev/Next Buttons */
+#prev-btn, #next-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+#prev-btn:hover, #next-btn:hover {
+    opacity: 0.7;
+}
+
+/* Play/Pause Button (Centered UNDER Seek Bar) */
+#play-pause-container {
+    display: flex;
+    justify-content: center;
+    width: 250px; /* SAME AS SEEK BAR */
+    margin-top: 8px;
+}
+
+#play-pause-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 22px;
+    cursor: pointer;
+}
+
+#play-pause-btn:hover {
+    opacity: 0.7;
+}
+
+/* --- RIGHT: Sign In/Sign Out (Moved to Rightmost Side) --- */
+#auth-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto; /* Pushes to rightmost side */
+}
+
+#login-btn, #logout-btn {
+    background: none;
+    border: 1px solid white;
+    color: white;
+    padding: 6px 12px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+#login-btn:hover, #logout-btn:hover {
+    background-color: white;
+    color: black;
+}
