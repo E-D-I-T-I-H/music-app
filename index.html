@@ -1,167 +1,35 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Music App</title>
-    <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js"></script>
-    <script src="https://www.youtube.com/iframe_api"></script>
-    <style>
-        body {
-            background-color: black;
-            color: white;
-            font-family: Arial, sans-serif;
-            text-align: center;
-        }
-        .container {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            width: 90%;
-            margin: auto;
-        }
-        .left-section {
-            width: 33%;
-            text-align: center;
-        }
-        .right-section {
-            width: 33%;
-            text-align: right;
-        }
-        .video-container {
-            width: 100%;
-            height: 200px;
-            background: gray;
-            margin-bottom: 10px;
-        }
-        .controls {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-        }
-        .search-container {
-            width: 100%;
-            margin-top: 10px;
-        }
-        .search-results {
-            list-style: none;
-            padding: 0;
-            max-height: 200px;
-            overflow-y: auto;
-            width: 100%;
-            max-width: 100%;
-            margin: auto;
-        }
-        .search-results li {
-            background: #222;
-            padding: 10px;
-            margin: 5px 0;
-            cursor: pointer;
-        }
-        .hidden {
-            display: none;
-        }
-    </style>
-</head>
-<body>
+<style>
+  body {
+      background-color: black;
+      color: white;
+      font-family: Arial, sans-serif;
+      text-align: center;
+  }
 
-    <h1>Music App</h1>
-    
-    <div class="container">
-        <!-- Left Section: Video Player -->
-        <div class="left-section">
-            <div id="player" class="video-container"></div>
-            <div class="controls">
-                <button onclick="prevVideo()"><<</button>
-                <input type="range" id="seek-bar" value="0">
-                <button onclick="nextVideo()">>></button>
-            </div>
-            <button onclick="togglePlayPause()">Play/Pause</button>
+  #player {
+      position: absolute;
+      left: 10%;
+      width: 30%;
+  }
 
-            <!-- Search Section -->
-            <div class="search-container">
-                <input type="text" id="search-box" placeholder="Search for music">
-                <button onclick="searchYouTube()">Search</button>
-            </div>
-            <ul id="search-results" class="search-results"></ul>
-        </div>
+  #controls {
+      position: absolute;
+      bottom: 10%;
+      left: 10%;
+      width: 30%;
+      display: flex;
+      justify-content: center;
+  }
 
-        <!-- Right Section: Sign In/Out -->
-        <div class="right-section">
-            <button id="sign-in" onclick="signIn()">Sign In with Google</button>
-            <button id="sign-out" onclick="signOut()" class="hidden">Sign Out</button>
-        </div>
-    </div>
+  #searchBar {
+      position: absolute;
+      bottom: 20%;
+      left: 10%;
+      width: 30%;
+  }
 
-    <script>
-        // Firebase Config
-        const firebaseConfig = {
-            apiKey: "AIzaSyBpDjE8zexNpsjyeGZWf09wdG4hAvOYcNQ",
-            authDomain: "musicapp-3a435.firebaseapp.com",
-            databaseURL: "https://musicapp-3a435-default-rtdb.firebaseio.com",
-            projectId: "musicapp-3a435",
-            storageBucket: "musicapp-3a435.firebasestorage.app",
-            messagingSenderId: "224181252004",
-            appId: "1:224181252004:web:4589e9da0d6400e5fd1b31",
-            measurementId: "G-FY5VPQG5NZ"
-        };
-
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-
-        // Sign In with Google
-        function signIn() {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider)
-                .then(result => {
-                    document.getElementById('sign-in').classList.add('hidden');
-                    document.getElementById('sign-out').classList.remove('hidden');
-                })
-                .catch(error => console.error("Sign-in Error:", error));
-        }
-
-        // Sign Out
-        function signOut() {
-            auth.signOut().then(() => {
-                document.getElementById('sign-in').classList.remove('hidden');
-                document.getElementById('sign-out').classList.add('hidden');
-            });
-        }
-
-        // YouTube API
-        let player;
-        function onYouTubeIframeAPIReady() {
-            player = new YT.Player('player', {
-                height: '200',
-                width: '100%',
-                videoId: '',
-                events: {
-                    'onReady': () => console.log("YouTube Player is ready!"),
-                }
-            });
-        }
-
-        function togglePlayPause() {
-            if (player.getPlayerState() === 1) {
-                player.pauseVideo();
-            } else {
-                player.playVideo();
-            }
-        }
-
-        function prevVideo() {
-            console.log("Previous video");
-        }
-
-        function nextVideo() {
-            console.log("Next video");
-        }
-
-        function searchYouTube() {
-            const query = document.getElementById("search-box").value;
-            if 
+  #searchResults {
+      max-width: 30%;
+      overflow: hidden;
+  }
+</style>
