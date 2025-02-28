@@ -23,7 +23,7 @@ body {
 #left-container {
     display: flex;
     flex-direction: column;
-    align-items: center; /* Centers everything under the player */
+    align-items: center;
 }
 
 /* YouTube Player */
@@ -44,7 +44,7 @@ body {
     border: none;
 }
 
-#search-button {
+#search-button, #add-to-playlist {
     padding: 8px 12px;
     margin-left: 5px;
     cursor: pointer;
@@ -54,29 +54,43 @@ body {
     border-radius: 5px;
 }
 
-#search-button:hover {
+#search-button:hover, #add-to-playlist:hover {
     background-color: #e03d00;
 }
 
-/* --- SEEK BAR & BUTTONS (CENTERED TO YOUTUBE PLAYER) --- */
+/* Search Results */
+#search-results {
+    list-style-type: disc;
+    margin-top: 10px;
+    padding-left: 20px;
+}
+
+#search-results li {
+    cursor: pointer;
+    margin: 5px 0;
+}
+
+#search-results li:hover {
+    color: #ff4500;
+}
+
+/* Seek Bar & Buttons */
 #controls-container {
     display: flex;
     flex-direction: column;
-    align-items: center; /* Centers everything */
-    width: 400px; /* SAME WIDTH AS YOUTUBE PLAYER */
+    align-items: center;
+    width: 400px;
     margin-top: 15px;
 }
 
-/* Seek Bar & Prev/Next Buttons */
 #seek-bar-container {
     display: flex;
     align-items: center;
-    justify-content: center; /* Centers the seek bar */
+    justify-content: center;
     width: 100%;
     gap: 15px;
 }
 
-/* Seek Bar */
 #seek-bar {
     flex-grow: 1;
     height: 5px;
@@ -85,20 +99,7 @@ body {
     cursor: pointer;
 }
 
-/* Prev/Next Buttons */
-#prev-btn, #next-btn {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 20px;
-    cursor: pointer;
-}
-
-#prev-btn:hover, #next-btn:hover {
-    opacity: 0.7;
-}
-
-/* Play/Pause Button (Centered UNDER Seek Bar) */
+/* Play/Pause Button */
 #play-pause-container {
     display: flex;
     justify-content: center;
@@ -118,7 +119,7 @@ body {
     opacity: 0.7;
 }
 
-/* --- RIGHT: Sign In/Sign Out (Moved to Rightmost Side) --- */
+/* Sign-In/Sign-Out */
 #auth-container {
     position: absolute;
     top: 15px;
@@ -127,7 +128,6 @@ body {
     align-items: center;
     gap: 10px;
 }
-
 
 #login-btn, #logout-btn {
     background: none;
@@ -141,4 +141,25 @@ body {
 #login-btn:hover, #logout-btn:hover {
     background-color: white;
     color: black;
+}
+
+/* Playlist */
+#playlist-container {
+    margin-top: 20px;
+    padding: 15px;
+}
+
+#playlist {
+    list-style-type: none;
+    padding: 0;
+}
+
+#playlist li {
+    cursor: pointer;
+    padding: 5px;
+    border-bottom: 1px solid #333;
+}
+
+#playlist li:hover {
+    background-color: #222;
 }
