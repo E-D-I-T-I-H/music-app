@@ -4,180 +4,180 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YouTube Music Player</title>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js"></script>
-    <script src="https://apis.google.com/js/api.js"></script>
+    <link rel="stylesheet" href="styles.css">
     <script src="https://www.youtube.com/iframe_api"></script>
-    <link rel="stylesheet" href="style.css">
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js"></script>
 </head>
 <body>
-    <!-- TOP CONTAINER -->
+    <!-- Top Section: YouTube Player & Search -->
     <div id="top-container">
-        <!-- LEFT: YouTube Player + Controls -->
+        <!-- Left Side: YouTube Player -->
         <div id="left-container">
             <div id="player"></div>
             <div id="controls-container">
                 <div id="seek-bar-container">
-                    <button id="prev-btn">⏮️</button>
-                    <input type="range" id="seek-bar" value="0">
-                    <button id="next-btn">⏭️</button>
+                    <button id="prev-btn">⏮</button>
+                    <input type="range" id="seek-bar" min="0" value="0">
+                    <button id="next-btn">⏭</button>
                 </div>
                 <div id="play-pause-container">
-                    <button id="play-pause-btn">⏯️</button>
+                    <button id="play-pause-btn">▶</button>
                 </div>
             </div>
         </div>
 
-        <!-- RIGHT: Search Bar + Search Results -->
+        <!-- Right Side: Search & Results -->
         <div id="search-container">
             <input type="text" id="search-input" placeholder="Search YouTube">
             <button id="search-button">🔍</button>
             <button id="add-to-playlist">➕</button>
-            <ul id="search-results"></ul>
-        </div>
-
-        <!-- AUTH: Sign-In / Sign-Out -->
-        <div id="auth-container">
-            <button id="login-btn">Sign In</button>
-            <button id="logout-btn" style="display:none;">Sign Out</button>
+            <div id="search-results"></div>
         </div>
     </div>
 
-    <!-- PLAYLIST (Visible to Everyone) -->
+    <!-- Playlist Section -->
     <div id="playlist-container">
-        <h3>Playlist</h3>
+        <h2>Playlist</h2>
         <ul id="playlist"></ul>
     </div>
 
-    <script>
-        // Your YouTube API Key
-        const YOUTUBE_API_KEY = "AIzaSyBFfY5CZScu8FdE2oLjaCTQ3H5WbAQXos8";
+    <!-- Google Sign-In -->
+    <div id="auth-container">
+        <button id="login-btn">Sign in with Google</button>
+        <button id="logout-btn" style="display:none;">Sign Out</button>
+    </div>
 
+    <script>
         // Firebase Configuration
         const firebaseConfig = {
-            apiKey: "YOUR_FIREBASE_CONFIG",
-            authDomain: "YOUR_FIREBASE_CONFIG",
-            databaseURL: "YOUR_FIREBASE_CONFIG",
-            projectId: "YOUR_FIREBASE_CONFIG",
-            storageBucket: "YOUR_FIREBASE_CONFIG",
-            messagingSenderId: "YOUR_FIREBASE_CONFIG",
-            appId: "YOUR_FIREBASE_CONFIG"
+            apiKey: "AIzaSyBFfY5CZScu8FdE2oLjaCTQ3H5WbAQXos8",
+            authDomain: "edith.firebaseapp.com",
+            databaseURL: "https://edith-default-rtdb.firebaseio.com",
+            projectId: "edith",
+            storageBucket: "edith.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abcdefghij"
         };
         firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
         const db = firebase.database();
 
-        let player, currentVideoId = "", playlist = [], currentIndex = 0;
-
-        // YouTube Player Setup
+        // YouTube API
+        let player, currentVideoId = "", playlist = [];
         function onYouTubeIframeAPIReady() {
-            player = new YT.Player("player", {
-                height: "225",
-                width: "400",
-                events: {
-                    "onStateChange": updateSeekBar
-                }
+            player = new YT.Player('player', {
+                height: '225',
+                width: '400',
+                events: { 'onReady': () => {} }
             });
         }
 
-        // Search YouTube
-        document.getElementById("search-button").addEventListener("click", () => {
-            let query = document.getElementById("search-input").value;
-            fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${query}&type=video&key=${YOUTUBE_API_KEY}`)
-                .then(response => response.json())
-                .then(data => {
-                    let resultsContainer = document.getElementById("search-results");
-                    resultsContainer.innerHTML = "";
-                    data.items.forEach(video => {
-                        let li = document.createElement("li");
-                        li.textContent = video.snippet.title;
-                        li.style.cursor = "pointer";
-                        li.onclick = () => {
-                            currentVideoId = video.id.videoId;
-                            player.loadVideoById(currentVideoId);
-                            resultsContainer.innerHTML = ""; // Clear results after selection
-                        };
-                        resultsContainer.appendChild(li);
-                    });
-                });
-        });
-
         // Play/Pause Button
         document.getElementById("play-pause-btn").addEventListener("click", () => {
-            let state = player.getPlayerState();
-            if (state === 1) player.pauseVideo();
-            else player.playVideo();
+            if (player.getPlayerState() === 1) { player.pauseVideo(); } 
+            else { player.playVideo(); }
         });
 
         // Seek Bar
-        function updateSeekBar() {
-            setInterval(() => {
-                if (player && player.getDuration) {
-                    document.getElementById("seek-bar").value = (player.getCurrentTime() / player.getDuration()) * 100;
-                }
-            }, 1000);
-        }
         document.getElementById("seek-bar").addEventListener("input", (e) => {
-            let seekTo = (e.target.value / 100) * player.getDuration();
-            player.seekTo(seekTo, true);
+            player.seekTo(e.target.value, true);
         });
 
-        // Prev & Next Buttons
-        document.getElementById("prev-btn").addEventListener("click", () => {
-            if (currentIndex > 0) {
-                currentIndex--;
-                player.loadVideoById(playlist[currentIndex]);
+        // Next & Prev
+        document.getElementById("prev-btn").addEventListener("click", () => playPlaylistVideo(-1));
+        document.getElementById("next-btn").addEventListener("click", () => playPlaylistVideo(1));
+
+        function playPlaylistVideo(direction) {
+            const index = playlist.findIndex(v => v.id === currentVideoId);
+            if (index !== -1) {
+                let newIndex = (index + direction + playlist.length) % playlist.length;
+                playVideo(playlist[newIndex].id);
             }
+        }
+
+        // Search YouTube
+        document.getElementById("search-button").addEventListener("click", async () => {
+            let query = document.getElementById("search-input").value;
+            let res = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${query}&type=video&key=AIzaSyBFfY5CZScu8FdE2oLjaCTQ3H5WbAQXos8`);
+            let data = await res.json();
+            let resultsDiv = document.getElementById("search-results");
+            resultsDiv.innerHTML = "";
+            data.items.forEach(video => {
+                let div = document.createElement("div");
+                div.innerHTML = `• <a href="#" onclick="playVideo('${video.id.videoId}')">${video.snippet.title}</a>`;
+                resultsDiv.appendChild(div);
+            });
         });
-        document.getElementById("next-btn").addEventListener("click", () => {
-            if (currentIndex < playlist.length - 1) {
-                currentIndex++;
-                player.loadVideoById(playlist[currentIndex]);
+
+        // Play Video
+        function playVideo(videoId) {
+            currentVideoId = videoId;
+            player.loadVideoById(videoId);
+        }
+
+        // Add to Playlist
+        document.getElementById("add-to-playlist").addEventListener("click", () => {
+            if (currentVideoId) {
+                let videoTitle = player.getVideoData().title;
+                playlist.push({ id: currentVideoId, title: videoTitle });
+                updatePlaylistUI();
+                savePlaylist();
             }
         });
 
-        // Google Authentication
-        function updateUI(user) {
+        // Update Playlist UI
+        function updatePlaylistUI() {
+            let list = document.getElementById("playlist");
+            list.innerHTML = "";
+            playlist.forEach(video => {
+                let li = document.createElement("li");
+                li.innerHTML = `• <a href="#" onclick="playVideo('${video.id}')">${video.title}</a>`;
+                list.appendChild(li);
+            });
+        }
+
+        // Save Playlist to Firebase
+        function savePlaylist() {
+            if (auth.currentUser) {
+                db.ref("playlists/" + auth.currentUser.uid).set(playlist);
+            }
+        }
+
+        // Load Playlist from Firebase
+        function loadPlaylist() {
+            if (auth.currentUser) {
+                db.ref("playlists/" + auth.currentUser.uid).once("value", snapshot => {
+                    if (snapshot.exists()) {
+                        playlist = snapshot.val();
+                        updatePlaylistUI();
+                    }
+                });
+            }
+        }
+
+        // Google Auth
+        document.getElementById("login-btn").addEventListener("click", () => {
+            let provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider);
+        });
+
+        document.getElementById("logout-btn").addEventListener("click", () => {
+            auth.signOut();
+        });
+
+        auth.onAuthStateChanged(user => {
             if (user) {
                 document.getElementById("login-btn").style.display = "none";
                 document.getElementById("logout-btn").style.display = "block";
+                loadPlaylist();
             } else {
                 document.getElementById("login-btn").style.display = "block";
                 document.getElementById("logout-btn").style.display = "none";
             }
-        }
-        firebase.auth().onAuthStateChanged(updateUI);
-        document.getElementById("login-btn").addEventListener("click", () => {
-            firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider());
-        });
-        document.getElementById("logout-btn").addEventListener("click", () => {
-            firebase.auth().signOut();
-        });
-
-        // Add to Playlist & Store in Firebase
-        document.getElementById("add-to-playlist").addEventListener("click", () => {
-            if (currentVideoId) {
-                db.ref("playlist").push(currentVideoId);
-            }
-        });
-
-        // Load Playlist from Firebase
-        db.ref("playlist").on("value", (snapshot) => {
-            let list = document.getElementById("playlist");
-            list.innerHTML = "";
-            playlist = [];
-            snapshot.forEach(child => {
-                let li = document.createElement("li");
-                li.textContent = child.val();
-                li.style.cursor = "pointer";
-                li.onclick = () => {
-                    currentIndex = playlist.indexOf(child.val());
-                    player.loadVideoById(child.val());
-                };
-                list.appendChild(li);
-                playlist.push(child.val());
-            });
         });
     </script>
 </body>
 </html>
+
