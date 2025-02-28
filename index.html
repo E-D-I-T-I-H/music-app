@@ -8,11 +8,6 @@
     <!-- External CSS -->
     <link rel="stylesheet" href="style.css">
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
-
     <!-- YouTube API -->
     <script src="https://www.youtube.com/iframe_api"></script>
 </head>
@@ -42,15 +37,9 @@
                 <button id="play-pause-btn">▶️</button>
             </div>
         </div>
-
-        <!-- Right: Sign-In -->
-        <div id="auth-container">
-            <button id="login-btn">Sign in with Google</button>
-            <button id="logout-btn" style="display: none;">Sign out</button>
-        </div>
     </div>
 
-    <!-- Playlist (Visible to Everyone) -->
+    <!-- Playlist -->
     <div id="playlist-container">
         <h2>Playlist</h2>
         <ul id="playlist"></ul>
@@ -67,7 +56,6 @@
             player = new YT.Player('player', {
                 height: '225',
                 width: '400',
-                videoId: '',
                 playerVars: { 'autoplay': 0, 'controls': 1 },
                 events: {
                     'onReady': () => console.log("YouTube Player Loaded"),
@@ -106,10 +94,9 @@
                             const button = document.createElement("button");
                             button.innerText = item.snippet.title;
                             button.addEventListener("click", function () {
-                                currentIndex = playlist.length; // Add to playlist index
-                                playlist.push(videoId);
+                                console.log("Playing:", videoId);
                                 player.loadVideoById(videoId);
-                                resultsContainer.innerHTML = ""; // Clear search results
+                                resultsContainer.innerHTML = ""; // Clear search results immediately after clicking
                             });
 
                             resultsContainer.appendChild(button);
@@ -158,4 +145,3 @@
 
 </body>
 </html>
-
