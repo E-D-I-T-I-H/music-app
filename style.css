@@ -1,70 +1,100 @@
-/* --- TOP CONTAINER: YouTube Player + Search + Auth --- */
-#top-container {
-    display: flex;
-    align-items: flex-start;
-    width: 100%;
-    padding: 15px;
-}
-
-/* --- LEFT: YouTube Player & Controls --- */
-#left-container {
+body {
+    font-family: Arial, sans-serif;
+    background-color: #181818;
+    color: white;
+    margin: 0;
+    padding: 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
-/* YouTube Player */
+#top-container {
+    display: flex;
+    width: 80%;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+#left-container {
+    flex: 1;
+}
+
 #player {
     width: 400px;
     height: 225px;
+    background: black;
 }
 
-/* --- RIGHT: Search Section (Next to Player) --- */
-#search-section {
-    margin-left: 20px; /* Push it to the right of the player */
+#controls-container {
     display: flex;
     flex-direction: column;
+    align-items: center;
+    margin-top: 10px;
 }
 
-/* Search Bar */
-#search-container {
+#seek-bar-container {
     display: flex;
     align-items: center;
+    width: 100%;
+}
+
+#seek-bar {
+    flex: 1;
+    margin: 0 10px;
+}
+
+#play-pause-container {
+    margin-top: 10px;
+}
+
+button {
+    background-color: #1db954;
+    border: none;
+    color: white;
+    padding: 8px 12px;
+    margin: 5px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+button:hover {
+    background-color: #17a144;
+}
+
+#search-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
 }
 
 #search-input {
-    width: 250px;
     padding: 8px;
-    border-radius: 5px;
-    border: none;
+    width: 80%;
+    margin-bottom: 5px;
 }
 
-#search-button {
-    padding: 8px 12px;
-    margin-left: 5px;
-    cursor: pointer;
-    background-color: #ff4500;
-    color: white;
-    border: none;
-    border-radius: 5px;
-}
-
-#search-button:hover {
-    background-color: #e03d00;
-}
-
-/* Search Results */
 #search-results {
     margin-top: 10px;
-    padding-left: 10px;
-    list-style-type: disc;
+    max-height: 200px;
+    overflow-y: auto;
 }
 
-#search-results li {
+#playlist-container {
+    width: 80%;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+li {
     cursor: pointer;
     margin: 5px 0;
 }
 
-#search-results li:hover {
-    color: #ff4500;
+#auth-container {
+    margin-top: 20px;
 }
