@@ -20,11 +20,10 @@
                 <div id="player"></div> <!-- YouTube Player Goes Here -->
             </div>
 
-            <!-- Search -->
+            <!-- Search Bar -->
             <div id="search-container">
                 <input type="text" id="search-input" placeholder="Search for songs...">
                 <button id="search-button">Search</button>
-                <div id="search-results"></div> <!-- Search Results Appear Here -->
             </div>
 
             <!-- Controls -->
@@ -36,6 +35,12 @@
                 </div>
                 <button id="play-pause-btn">▶️</button>
             </div>
+        </div>
+
+        <!-- Right: Search Results (Placed Beside Player) -->
+        <div id="search-results-container">
+            <h3>Search Results</h3>
+            <ul id="search-results"></ul> <!-- Search Results Appear Here -->
         </div>
     </div>
 
@@ -91,15 +96,16 @@
 
                         data.items.forEach(item => {
                             const videoId = item.id.videoId;
-                            const button = document.createElement("button");
-                            button.innerText = item.snippet.title;
-                            button.addEventListener("click", function () {
+                            const li = document.createElement("li");
+                            li.innerText = item.snippet.title;
+                            li.style.cursor = "pointer";
+                            li.addEventListener("click", function () {
                                 console.log("Playing:", videoId);
                                 player.loadVideoById(videoId);
                                 resultsContainer.innerHTML = ""; // Clear search results immediately after clicking
                             });
 
-                            resultsContainer.appendChild(button);
+                            resultsContainer.appendChild(li);
                         });
 
                         console.log("Search Results Displayed");
@@ -143,5 +149,115 @@
         }
     </script>
 
+    <style>
+        /* General Page Styles */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #181818;
+            color: white;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* --- TOP CONTAINER: YouTube Player + Search + Controls + Results --- */
+        #top-container {
+            display: flex;
+            justify-content: flex-start;
+            align-items: flex-start;
+            width: 100%;
+            padding: 15px;
+        }
+
+        /* --- LEFT: YouTube Player & Controls --- */
+        #left-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* YouTube Player */
+        #player {
+            width: 400px;
+            height: 225px;
+        }
+
+        /* Search Bar */
+        #search-container {
+            margin-top: 10px;
+        }
+
+        #search-input {
+            width: 250px;
+            padding: 8px;
+            border-radius: 5px;
+            border: none;
+        }
+
+        #search-button {
+            padding: 8px 12px;
+            margin-left: 5px;
+            cursor: pointer;
+            background-color: #ff4500;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+
+        #search-button:hover {
+            background-color: #e03d00;
+        }
+
+        /* --- SEARCH RESULTS (PLACED TO THE RIGHT) --- */
+        #search-results-container {
+            margin-left: 20px;
+            max-width: 400px;
+        }
+
+        #search-results {
+            list-style: disc;
+            padding-left: 20px;
+        }
+
+        #search-results li {
+            cursor: pointer;
+            padding: 5px 0;
+        }
+
+        #search-results li:hover {
+            text-decoration: underline;
+        }
+
+        /* --- CONTROLS --- */
+        #controls-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 400px;
+            margin-top: 15px;
+        }
+
+        #seek-bar-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            gap: 15px;
+        }
+
+        #play-pause-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        #play-pause-btn:hover {
+            opacity: 0.7;
+        }
+    </style>
 </body>
 </html>
