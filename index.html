@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Music Player</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js"></script>
+</head>
+<body>
+    <div id="top-container">
+        <div id="left-container">
+            <div id="player"></div>
+            <div id="controls-container">
+                <div id="seek-bar-container">
+                    <button id="prev-btn">⏮</button>
+                    <input type="range" id="seek-bar" min="0" value="0">
+                    <button id="next-btn">⏭</button>
+                </div>
+                <button id="play-pause-btn">▶</button>
+            </div>
+        </div>
+
+        <div id="search-container">
+            <input type="text" id="search-input" placeholder="Search YouTube">
+            <button id="search-button">🔍</button>
+            <button id="add-to-playlist">➕</button>
+            <div id="search-results"></div>
+        </div>
+    </div>
+
+    <div id="playlist-container">
+        <h2>Playlist</h2>
+        <ul id="playlist"></ul>
+    </div>
+
+    <div id="auth-container">
+        <button id="login-btn">Sign in with Google</button>
+        <button id="logout-btn" style="display:none;">Sign Out</button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
