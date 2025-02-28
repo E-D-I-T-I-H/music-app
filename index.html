@@ -7,7 +7,10 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+
+    <!-- TOP CONTAINER -->
     <div id="top-container">
+        <!-- LEFT: YouTube Player -->
         <div id="left-container">
             <div id="player"></div>  
             <div id="controls-container">
@@ -17,144 +20,58 @@
                 <button id="play-pause-btn">▶</button>
             </div>
         </div>
+
+        <!-- MIDDLE: Search Bar & Results -->
         <div id="search-container">
             <input type="text" id="search-input" placeholder="Search for a song...">
             <button id="search-button">Search</button>
             <button id="add-to-playlist">➕</button>
             <div id="search-results"></div>
         </div>
+
+        <!-- RIGHT: Sign In/Sign Out -->
         <div id="auth-container">
             <button id="login-btn">Sign In</button>
             <button id="logout-btn" style="display:none;">Sign Out</button>
         </div>
     </div>
+
+    <!-- PLAYLIST -->
     <div id="playlist-container">
         <h3>Playlist</h3>
         <ul id="playlist"></ul>
     </div>
+
+    <!-- YOUTUBE API -->
     <script src="https://www.youtube.com/iframe_api"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js"></script>
-    <script>
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_PROJECT.firebaseapp.com",
-            databaseURL: "https://YOUR_PROJECT.firebaseio.com",
-            projectId: "YOUR_PROJECT",
-            storageBucket: "YOUR_PROJECT.appspot.com",
-            messagingSenderId: "YOUR_SENDER_ID",
-            appId: "YOUR_APP_ID"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.database();
-        let player;
-        let currentVideoId = "";
-        let playlist = [];
-        function onYouTubeIframeAPIReady() {
-            player = new YT.Player("player", {
-                height: "225",
-                width: "400",
-                videoId: "",
-                events: { onReady: () => console.log("YouTube Player Ready") },
-            });
-        }
-        function searchYouTube() {
-            const query = document.getElementById("search-input").value;
-            const API_KEY = "YOUR_YOUTUBE_API_KEY";
-            fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${query}&type=video&key=${API_KEY}`)
-                .then(response => response.json())
-                .then(data => {
-                    const resultsDiv = document.getElementById("search-results");
-                    resultsDiv.innerHTML = "";
-                    data.items.forEach(video => {
-                        const videoTitle = video.snippet.title;
-                        const videoId = video.id.videoId;
-                        const resultItem = document.createElement("div");
-                        resultItem.innerHTML = `• ${videoTitle}`;
-                        resultItem.style.cursor = "pointer";
-                        resultItem.onclick = () => playVideo(videoId);
-                        resultsDiv.appendChild(resultItem);
-                    });
-                })
-                .catch(error => console.error("Error fetching YouTube data:", error));
-        }
-        function playVideo(videoId) {
-            if (player) {
-                currentVideoId = videoId;
-                player.loadVideoById(videoId);
-                document.getElementById("search-results").innerHTML = "";
-            }
-        }
-        function addToPlaylist() {
-            if (!currentVideoId) return;
-            db.ref("playlist").push({ videoId: currentVideoId });
-        }
-        function loadPlaylist() {
-            db.ref("playlist").on("value", (snapshot) => {
-                playlist = [];
-                const list = document.getElementById("playlist");
-                list.innerHTML = "";
-                snapshot.forEach(child => {
-                    const video = child.val();
-                    playlist.push(video.videoId);
-                    const item = document.createElement("li");
-                    item.textContent = `Video ID: ${video.videoId}`;
-                    item.onclick = () => playVideo(video.videoId);
-                    list.appendChild(item);
-                });
-            });
-        }
-        function playPause() {
-            if (player) {
-                const state = player.getPlayerState();
-                if (state === 1) {
-                    player.pauseVideo();
-                    document.getElementById("play-pause-btn").textContent = "▶";
-                } else {
-                    player.playVideo();
-                    document.getElementById("play-pause-btn").textContent = "⏸";
-                }
-            }
-        }
-        function nextVideo() {
-            let index = playlist.indexOf(currentVideoId);
-            if (index < playlist.length - 1) {
-                playVideo(playlist[index + 1]);
-            }
-        }
-        function prevVideo() {
-            let index = playlist.indexOf(currentVideoId);
-            if (index > 0) {
-                playVideo(playlist[index - 1]);
-            }
-        }
-        function signIn() {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider).then(() => {
-                document.getElementById("login-btn").style.display = "none";
-                document.getElementById("logout-btn").style.display = "block";
-            }).catch(error => console.error("Sign-in Error:", error));
-        }
-        function signOut() {
-            auth.signOut().then(() => {
-                document.getElementById("login-btn").style.display = "block";
-                document.getElementById("logout-btn").style.display = "none";
-            });
-        }
-        auth.onAuthStateChanged(user => {
-            document.getElementById("login-btn").style.display = user ? "none" : "block";
-            document.getElementById("logout-btn").style.display = user ? "block" : "none";
-        });
-        document.getElementById("search-button").addEventListener("click", searchYouTube);
-        document.getElementById("play-pause-btn").addEventListener("click", playPause);
-        document.getElementById("prev-btn").addEventListener("click", prevVideo);
-        document.getElementById("next-btn").addEventListener("click", nextVideo);
-        document.getElementById("add-to-playlist").addEventListener("click", addToPlaylist);
-        document.getElementById("login-btn").addEventListener("click", signIn);
-        document.getElementById("logout-btn").addEventListener("click", signOut);
-        loadPlaylist();
+
+    <!-- FIREBASE SDK -->
+    <script type="module">
+      // Import the functions you need from the SDKs you need
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+      import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js";
+      import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+      import { getDatabase, ref, push, remove, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+      // Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyAF8R4iNFv3oAZVOZcw5fWUPz8FScTeBXM",
+        authDomain: "musicapp-3a435.firebaseapp.com",
+        databaseURL: "https://musicapp-3a435-default-rtdb.firebaseio.com",
+        projectId: "musicapp-3a435",
+        storageBucket: "musicapp-3a435.firebasestorage.app",
+        messagingSenderId: "224181252004",
+        appId: "1:224181252004:web:4589e9da0d6400e5fd1b31",
+        measurementId: "G-FY5VPQG5NZ"
+      };
+
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const auth = getAuth();
+      const db = getDatabase();
     </script>
+
+    <script src="script.js"></script>
 </body>
 </html>
