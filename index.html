@@ -8,6 +8,10 @@
     <!-- External CSS -->
     <link rel="stylesheet" href="style.css">
 
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js"></script>
+
     <!-- YouTube API -->
     <script src="https://www.youtube.com/iframe_api"></script>
 </head>
@@ -24,6 +28,7 @@
             <div id="search-container">
                 <input type="text" id="search-input" placeholder="Search for songs...">
                 <button id="search-button">Search</button>
+                <button id="add-to-playlist">➕</button> <!-- Add to Playlist Button -->
             </div>
 
             <!-- Controls -->
@@ -37,7 +42,7 @@
             </div>
         </div>
 
-        <!-- Right: Search Results (Placed Beside Player) -->
+        <!-- Right: Search Results -->
         <div id="search-results-container">
             <h3>Search Results</h3>
             <ul id="search-results"></ul> <!-- Search Results Appear Here -->
@@ -51,6 +56,19 @@
     </div>
 
     <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBFfY5CZScu8FdE2oLjaCTQ3H5WbAQXos8",
+            authDomain: "edith.firebaseapp.com",
+            databaseURL: "https://edith-default-rtdb.firebaseio.com/",
+            projectId: "edith",
+            storageBucket: "edith.appspot.com",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
         let player;
         let playlist = [];
         let currentIndex = 0;
@@ -67,6 +85,8 @@
                     'onStateChange': syncPlayback
                 }
             });
+
+            loadPlaylistFromFirebase();
         }
 
         document.addEventListener("DOMContentLoaded", function () {
@@ -112,152 +132,53 @@
                     });
             });
 
-            // Next & Previous Buttons
-            document.getElementById("next-btn").addEventListener("click", function () {
-                if (playlist.length > 0 && currentIndex < playlist.length - 1) {
-                    currentIndex++;
-                    player.loadVideoById(playlist[currentIndex]);
+            // Add to Playlist Button
+            document.getElementById("add-to-playlist").addEventListener("click", function () {
+                if (player && player.getVideoData().video_id) {
+                    const videoId = player.getVideoData().video_id;
+                    const title = player.getVideoData().title;
+
+                    console.log("Adding to playlist:", title);
+
+                    const newSong = { videoId, title };
+
+                    db.ref("playlist").push(newSong); // Save to Firebase
                 }
             });
 
-            document.getElementById("prev-btn").addEventListener("click", function () {
-                if (playlist.length > 0 && currentIndex > 0) {
-                    currentIndex--;
-                    player.loadVideoById(playlist[currentIndex]);
-                }
-            });
+            // Load Playlist from Firebase
+            function loadPlaylistFromFirebase() {
+                db.ref("playlist").on("value", snapshot => {
+                    const playlistContainer = document.getElementById("playlist");
+                    playlistContainer.innerHTML = ""; // Clear old playlist
 
-            // Seek Bar
-            document.getElementById("seek-bar").addEventListener("input", function () {
-                if (player && player.getDuration) {
-                    const seekToTime = (this.value / 100) * player.getDuration();
-                    player.seekTo(seekToTime, true);
-                }
-            });
+                    if (snapshot.exists()) {
+                        playlist = []; // Reset local playlist
 
-            setInterval(() => {
-                if (player && player.getCurrentTime && player.getDuration()) {
-                    const progress = (player.getCurrentTime() / player.getDuration()) * 100;
-                    document.getElementById("seek-bar").value = progress;
-                }
-            }, 1000);
+                        snapshot.forEach(child => {
+                            const song = child.val();
+                            playlist.push(song.videoId);
+
+                            const li = document.createElement("li");
+                            li.innerText = song.title;
+                            li.style.cursor = "pointer";
+                            li.addEventListener("click", function () {
+                                console.log("Playing from Playlist:", song.videoId);
+                                player.loadVideoById(song.videoId);
+                            });
+
+                            playlistContainer.appendChild(li);
+                        });
+
+                        console.log("Playlist Loaded from Firebase");
+                    }
+                });
+            }
         });
 
-        // Sync Playback Function (Placeholder for Firebase Sync)
         function syncPlayback(event) {
             console.log("Playback State Changed:", event.data);
         }
     </script>
-
-    <style>
-        /* General Page Styles */
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #181818;
-            color: white;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-        }
-
-        /* --- TOP CONTAINER: YouTube Player + Search + Controls + Results --- */
-        #top-container {
-            display: flex;
-            justify-content: flex-start;
-            align-items: flex-start;
-            width: 100%;
-            padding: 15px;
-        }
-
-        /* --- LEFT: YouTube Player & Controls --- */
-        #left-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        /* YouTube Player */
-        #player {
-            width: 400px;
-            height: 225px;
-        }
-
-        /* Search Bar */
-        #search-container {
-            margin-top: 10px;
-        }
-
-        #search-input {
-            width: 250px;
-            padding: 8px;
-            border-radius: 5px;
-            border: none;
-        }
-
-        #search-button {
-            padding: 8px 12px;
-            margin-left: 5px;
-            cursor: pointer;
-            background-color: #ff4500;
-            color: white;
-            border: none;
-            border-radius: 5px;
-        }
-
-        #search-button:hover {
-            background-color: #e03d00;
-        }
-
-        /* --- SEARCH RESULTS (PLACED TO THE RIGHT) --- */
-        #search-results-container {
-            margin-left: 20px;
-            max-width: 400px;
-        }
-
-        #search-results {
-            list-style: disc;
-            padding-left: 20px;
-        }
-
-        #search-results li {
-            cursor: pointer;
-            padding: 5px 0;
-        }
-
-        #search-results li:hover {
-            text-decoration: underline;
-        }
-
-        /* --- CONTROLS --- */
-        #controls-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 400px;
-            margin-top: 15px;
-        }
-
-        #seek-bar-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            gap: 15px;
-        }
-
-        #play-pause-btn {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-        }
-
-        #play-pause-btn:hover {
-            opacity: 0.7;
-        }
-    </style>
 </body>
 </html>
