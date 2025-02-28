@@ -1,5 +1,5 @@
 const firebaseConfig = {
-    apiKey: "AIzaSyBFfY5CZScu8FdE2oLjaCTQ3H5WbAQXos8",
+    apiKey: "YOUR_API_KEY",
     authDomain: "edith.firebaseapp.com",
     databaseURL: "https://edith-default-rtdb.firebaseio.com",
     projectId: "edith",
@@ -25,11 +25,6 @@ function onYouTubeIframeAPIReady() {
 document.getElementById("play-pause-btn").addEventListener("click", () => {
     if (player.getPlayerState() === 1) { player.pauseVideo(); } 
     else { player.playVideo(); }
-});
-
-// Seek Bar
-document.getElementById("seek-bar").addEventListener("input", (e) => {
-    player.seekTo(e.target.value, true);
 });
 
 // Next & Prev
