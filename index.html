@@ -1,35 +1,127 @@
-<style>
-  body {
-      background-color: black;
-      color: white;
-      font-family: Arial, sans-serif;
-      text-align: center;
-  }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music App</title>
+    <link rel="stylesheet" href="styles.css"> <!-- External CSS -->
+</head>
+<body>
+    <!-- Google Sign-In -->
+    <button id="signInBtn">Sign In with Google</button>
+    <button id="signOutBtn" style="display: none;">Sign Out</button>
 
-  #player {
-      position: absolute;
-      left: 10%;
-      width: 30%;
-  }
+    <!-- YouTube Player -->
+    <div id="player-container">
+        <div id="player"></div>
+        <div id="controls">
+            <button id="prevBtn"><<</button>
+            <input type="range" id="seekBar" min="0" value="0">
+            <button id="playPauseBtn">Play</button>
+            <button id="nextBtn">>></button>
+        </div>
+    </div>
 
-  #controls {
-      position: absolute;
-      bottom: 10%;
-      left: 10%;
-      width: 30%;
-      display: flex;
-      justify-content: center;
-  }
+    <!-- Search Bar -->
+    <input type="text" id="searchInput" placeholder="Search for a song...">
+    <button id="searchBtn">Search</button>
+    <div id="searchResults"></div>
 
-  #searchBar {
-      position: absolute;
-      bottom: 20%;
-      left: 10%;
-      width: 30%;
-  }
+    <!-- Firebase & YouTube API -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
-  #searchResults {
-      max-width: 30%;
-      overflow: hidden;
-  }
-</style>
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyBpDjE8zexNpsjyeGZWf09wdG4hAvOYcNQ",
+            authDomain: "musicapp-3a435.firebaseapp.com",
+            databaseURL: "https://musicapp-3a435-default-rtdb.firebaseio.com",
+            projectId: "musicapp-3a435",
+            storageBucket: "musicapp-3a435.appspot.com",
+            messagingSenderId: "224181252004",
+            appId: "1:224181252004:web:4589e9da0d6400e5fd1b31"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth();
+        const provider = new GoogleAuthProvider();
+
+        // Sign In
+        document.getElementById('signInBtn').addEventListener('click', () => {
+            signInWithPopup(auth, provider)
+                .then(result => {
+                    document.getElementById('signInBtn').style.display = 'none';
+                    document.getElementById('signOutBtn').style.display = 'block';
+                })
+                .catch(error => console.error(error));
+        });
+
+        // Sign Out
+        document.getElementById('signOutBtn').addEventListener('click', () => {
+            signOut(auth)
+                .then(() => {
+                    document.getElementById('signInBtn').style.display = 'block';
+                    document.getElementById('signOutBtn').style.display = 'none';
+                })
+                .catch(error => console.error(error));
+        });
+    </script>
+
+    <!-- YouTube API -->
+    <script>
+        let player;
+
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('player', {
+                height: '360',
+                width: '640',
+                videoId: 'dQw4w9WgXcQ', // Default video
+                events: {
+                    'onReady': () => console.log("YouTube Player Ready!")
+                }
+            });
+        }
+
+        document.getElementById('playPauseBtn').addEventListener('click', () => {
+            if (player.getPlayerState() === 1) {
+                player.pauseVideo();
+                document.getElementById('playPauseBtn').textContent = 'Play';
+            } else {
+                player.playVideo();
+                document.getElementById('playPauseBtn').textContent = 'Pause';
+            }
+        });
+
+        document.getElementById('searchBtn').addEventListener('click', () => {
+            let query = document.getElementById('searchInput').value;
+            let apiKey = "AIzaSyBpDjE8zexNpsjyeGZWf09wdG4hAvOYcNQ";
+            let url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${query}&type=video&key=${apiKey}`;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    let resultsDiv = document.getElementById('searchResults');
+                    resultsDiv.innerHTML = "";
+                    data.items.forEach(item => {
+                        let videoId = item.id.videoId;
+                        let title = item.snippet.title;
+
+                        let result = document.createElement('div');
+                        result.textContent = title;
+                        result.style.cursor = 'pointer';
+                        result.onclick = () => {
+                            player.loadVideoById(videoId);
+                            resultsDiv.innerHTML = ""; // Hide results after selection
+                        };
+                        resultsDiv.appendChild(result);
+                    });
+                })
+                .catch(error => console.error("Search Error:", error));
+        });
+    </script>
+
+    <script src="https://www.youtube.com/iframe_api"></script>
+</body>
+</html>
