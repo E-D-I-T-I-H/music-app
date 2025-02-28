@@ -1,84 +1,71 @@
-body {
-    font-family: Arial, sans-serif;
-    background-color: #181818;
-    color: white;
-    margin: 0;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Sync App</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- LEFT CONTAINER -->
+    <div id="left-container">
+        <!-- YouTube Player with Add Button -->
+        <div id="player-container">
+            <div id="player"></div>
+            <button id="add-to-playlist">➕</button>
+        </div>
 
-#top-container {
-    display: flex;
-    width: 80%;
-    justify-content: space-between;
-    margin-bottom: 20px;
-}
+        <!-- Playback Controls -->
+        <div id="controls-container">
+            <button id="prev-btn">⏮</button>
+            <input type="range" id="seek-bar" min="0" value="0">
+            <button id="next-btn">⏭</button>
+        </div>
+        <div id="play-pause-container">
+            <button id="play-pause-btn">▶</button>
+        </div>
 
-#left-container {
-    flex: 1;
-}
+        <!-- Search Bar & Results -->
+        <div id="search-container">
+            <input type="text" id="search-input" placeholder="Search for a song...">
+            <button id="search-button">Search</button>
+            <div id="search-results"></div>
+        </div>
 
-#player {
-    width: 400px;
-    height: 225px;
-    background: black;
-}
+        <!-- Playlist -->
+        <div id="playlist-container">
+            <h3>Playlist</h3>
+            <ul id="playlist"></ul>
+        </div>
+    </div>
 
-#controls-container {
-    display: flex;
-    justify-content: center;
-    margin-top: 10px;
-}
+    <!-- RIGHT: Sign In/Sign Out -->
+    <div id="auth-container">
+        <button id="login-btn">Sign In</button>
+        <button id="logout-btn" style="display:none;">Sign Out</button>
+    </div>
 
-button {
-    background-color: #1db954;
-    border: none;
-    color: white;
-    padding: 8px 12px;
-    margin: 5px;
-    cursor: pointer;
-    border-radius: 5px;
-}
+    <!-- YOUTUBE API -->
+    <script src="https://www.youtube.com/iframe_api"></script>
 
-button:hover {
-    background-color: #17a144;
-}
+    <!-- FIREBASE SDK & FUNCTIONALITY -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+        import { getDatabase, ref, push, remove, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
-#search-container {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-}
+        const firebaseConfig = {
+            apiKey: "AIzaSyAF8R4iNFv3oAZVOZcw5fWUPz8FScTeBXM",
+            authDomain: "musicapp-3a435.firebaseapp.com",
+            databaseURL: "https://musicapp-3a435-default-rtdb.firebaseio.com",
+            projectId: "musicapp-3a435",
+            storageBucket: "musicapp-3a435.firebasestorage.app",
+            messagingSenderId: "224181252004",
+            appId: "1:224181252004:web:4589e9da0d6400e5fd1b31",
+            measurementId: "G-FY5VPQG5NZ"
+        };
 
-#search-input {
-    padding: 8px;
-    width: 80%;
-    margin-bottom: 5px;
-}
-
-#search-results {
-    margin-top: 10px;
-    max-height: 200px;
-    overflow-y: auto;
-}
-
-#playlist-container {
-    width: 80%;
-}
-
-ul {
-    list-style: none;
-    padding: 0;
-}
-
-li {
-    cursor: pointer;
-    margin: 5px 0;
-}
-
-#auth-container {
-    margin-top: 20px;
-}
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth();
+        const db = getDatabase();
+ 
