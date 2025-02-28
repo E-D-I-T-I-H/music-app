@@ -4,121 +4,144 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Music App</title>
+    <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js" type="module"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js" type="module"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js" type="module"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js" type="module"></script>
     <script src="https://www.youtube.com/iframe_api"></script>
+    <style>
+        body {
+            background-color: black;
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        #container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+        }
+        #player-container {
+            width: 33%;
+        }
+        #controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 10px;
+        }
+        button {
+            background-color: darkblue;
+            color: white;
+            padding: 10px;
+            border: none;
+            margin: 5px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        #slider {
+            width: 50%;
+        }
+    </style>
 </head>
 <body>
-
-    <h1>Music App</h1>
-
-    <!-- Sign-in Button -->
-    <button id="sign-in-btn">Sign in with Google</button>
-    <p id="user-info"></p>
-
-    <!-- Search Bar -->
-    <input type="text" id="search-query" placeholder="Search for a song">
-    <button id="search-btn">Search</button>
-
-    <!-- Search Results -->
-    <ul id="results"></ul>
-
-    <!-- YouTube Player -->
-    <div id="player"></div>
+    <div id="container">
+        <button id="sign-in">Sign In</button>
+        <button id="sign-out" style="display:none;">Sign Out</button>
+    </div>
+    
+    <div id="player-container">
+        <div id="player"></div>
+        <input type="range" id="slider" min="0" max="100" value="0">
+        <div id="controls">
+            <button id="prev"><<</button>
+            <button id="play-pause">Play</button>
+            <button id="next">>></button>
+        </div>
+    </div>
 
     <script type="module">
-        // ✅ Import Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-        import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
-
-        // ✅ Firebase Configuration
+        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+        
         const firebaseConfig = {
             apiKey: "AIzaSyAF8R4iNFv3oAZVOZcw5fWUPz8FScTeBXM",
             authDomain: "musicapp-3a435.firebaseapp.com",
             databaseURL: "https://musicapp-3a435-default-rtdb.firebaseio.com",
             projectId: "musicapp-3a435",
-            storageBucket: "musicapp-3a435.appspot.com",  // 🔥 Fixed StorageBucket
+            storageBucket: "musicapp-3a435.firebasestorage.app",
             messagingSenderId: "224181252004",
             appId: "1:224181252004:web:4589e9da0d6400e5fd1b31",
             measurementId: "G-FY5VPQG5NZ"
         };
 
-        // ✅ Initialize Firebase
         const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const database = getDatabase(app);
+        const auth = getAuth();
         const provider = new GoogleAuthProvider();
 
-        // ✅ Google Sign-In
-        document.getElementById("sign-in-btn").addEventListener("click", () => {
-            signInWithPopup(auth, provider)
-                .then((result) => {
-                    const user = result.user;
-                    console.log("Signed in as:", user.displayName);
-                    document.getElementById("user-info").innerText = `Hello, ${user.displayName}`;
-                })
-                .catch((error) => {
-                    console.error("Sign-in Error:", error.message);
-                });
+        document.getElementById("sign-in").addEventListener("click", () => {
+            signInWithPopup(auth, provider).then((result) => {
+                document.getElementById("sign-in").style.display = "none";
+                document.getElementById("sign-out").style.display = "block";
+            }).catch((error) => console.log("Sign-in Error:", error));
         });
 
-        // ✅ YouTube API Key
-        const YOUTUBE_API_KEY = "AIzaSyAF8R4iNFv3oAZVOZcw5fWUPz8FScTeBXM";  // 🔥 Use the same API key
-
-        // ✅ Search for a Song
-        document.getElementById("search-btn").addEventListener("click", () => {
-            const query = document.getElementById("search-query").value;
-            searchYouTube(query);
+        document.getElementById("sign-out").addEventListener("click", () => {
+            signOut(auth).then(() => {
+                document.getElementById("sign-in").style.display = "block";
+                document.getElementById("sign-out").style.display = "none";
+            }).catch((error) => console.log("Sign-out Error:", error));
         });
 
-        function searchYouTube(query) {
-            const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&key=${YOUTUBE_API_KEY}`;
-            
-            fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                    const results = document.getElementById("results");
-                    results.innerHTML = "";
-                    
-                    if (!data.items || data.items.length === 0) {
-                        results.innerHTML = "<p>No results found.</p>";
-                        return;
-                    }
-
-                    data.items.forEach(item => {
-                        const videoId = item.id.videoId;
-                        const title = item.snippet.title;
-
-                        const li = document.createElement("li");
-                        li.textContent = title;
-                        li.addEventListener("click", () => loadVideo(videoId));
-
-                        results.appendChild(li);
-                    });
-                })
-                .catch(error => console.error("Search Error:", error));
-        }
-
-        // ✅ Load YouTube Player
         let player;
         function onYouTubeIframeAPIReady() {
             player = new YT.Player('player', {
-                height: '360',
-                width: '640',
-                videoId: '',
+                height: '200',
+                width: '300',
+                videoId: 'dQw4w9WgXcQ', // Default video
                 events: {
-                    'onReady': () => console.log("YouTube Player is ready!"),
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange
                 }
             });
         }
 
-        function loadVideo(videoId) {
-            if (player) {
-                player.loadVideoById(videoId);
-            } else {
-                console.error("YouTube Player is not ready.");
-            }
+        function onPlayerReady(event) {
+            document.getElementById("play-pause").addEventListener("click", () => {
+                const state = player.getPlayerState();
+                if (state === YT.PlayerState.PLAYING) {
+                    player.pauseVideo();
+                    document.getElementById("play-pause").innerText = "Play";
+                } else {
+                    player.playVideo();
+                    document.getElementById("play-pause").innerText = "Pause";
+                }
+            });
+
+            document.getElementById("prev").addEventListener("click", () => {
+                console.log("Previous button clicked");
+            });
+
+            document.getElementById("next").addEventListener("click", () => {
+                console.log("Next button clicked");
+            });
+
+            document.getElementById("slider").addEventListener("input", (e) => {
+                const seekTo = (player.getDuration() * e.target.value) / 100;
+                player.seekTo(seekTo, true);
+            });
+
+            setInterval(() => {
+                if (player && player.getDuration()) {
+                    document.getElementById("slider").value = (player.getCurrentTime() / player.getDuration()) * 100;
+                }
+            }, 1000);
+        }
+
+        function onPlayerStateChange(event) {
+            console.log("Player state changed:", event.data);
         }
     </script>
-
 </body>
 </html>
