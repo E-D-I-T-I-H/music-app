@@ -28,23 +28,7 @@ body {
 
 #controls-container {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-top: 10px;
-}
-
-#seek-bar-container {
-    display: flex;
-    align-items: center;
-    width: 100%;
-}
-
-#seek-bar {
-    flex: 1;
-    margin: 0 10px;
-}
-
-#play-pause-container {
+    justify-content: center;
     margin-top: 10px;
 }
 
